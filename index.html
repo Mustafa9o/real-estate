@@ -195,7 +195,7 @@
         }
         
         .section-title {
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: var(--dark-color);
             margin: 40px 0 20px;
             text-align: center;
@@ -243,7 +243,7 @@
         }
         
         .page-title {
-            font-size: 2.2rem;
+            font-size: 2.8rem;
             color: var(--dark-color);
             margin: 20px 0;
             text-align: center;
@@ -284,64 +284,6 @@
         
         .page-search-form button:hover {
             background: var(--primary-color);
-        }
-        
-        .filters {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-        
-        .filter-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
-        }
-        
-        .filter-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .filter-group select, .filter-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        .filter-buttons {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        
-        .filter-buttons button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        
-        .btn-search {
-            background: var(--secondary-color);
-            color: white;
-            margin-left: 10px;
-        }
-        
-        .btn-reset {
-            background: #ddd;
-            color: #333;
         }
         
         .properties-grid {
@@ -593,6 +535,7 @@
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 30px;
+            align-items: start;
         }
         
         /* Details Section */
@@ -605,7 +548,7 @@
         }
         
         .section-title {
-            font-size: 1.5rem;
+            font-size: 2rem;
             color: var(--dark-color);
             margin-top: 20px;
             padding-bottom: 10px;
@@ -671,7 +614,6 @@
         
         /* Owner Info */
         .owner-section {
-             margin-top: 8px;
             background: white;
             border-radius: 8px;
             padding: 25px;
@@ -717,7 +659,7 @@
         }
         
         .contact-info {
-            margin-top: 200px;
+            margin-top: 20px;
         }
         
         .contact-item {
@@ -1107,10 +1049,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .filter-row {
-                flex-direction: column;
-            }
-            
             .action-buttons {
                 flex-direction: column;
             }
@@ -1473,7 +1411,6 @@
                 <div id="sale-search-results-container"></div>
             </div>
             
-            
             <!-- Properties Grid -->
             <div class="properties-grid" id="sale-properties-grid">
                 <!-- Property 1 -->
@@ -1618,81 +1555,6 @@
             <div id="rent-search-results" class="search-results">
                 <h2 class="search-results-title">نتائج البحث</h2>
                 <div id="rent-search-results-container"></div>
-            </div>
-            
-            <!-- Filters -->
-            <div class="filters">
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label>المدينة</label>
-                        <select>
-                            <option value="">جميع المدن</option>
-                            <option value="riyadh">الرياض</option>
-                            <option value="jeddah">جدة</option>
-                            <option value="dammam">الدمام</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label>نوع العقار</label>
-                        <select>
-                            <option value="">جميع الأنواع</option>
-                            <option value="villa">فيلا</option>
-                            <option value="apartment">شقة</option>
-                            <option value="studio">استوديو</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label>السعر الشهري</label>
-                        <select>
-                            <option value="">جميع الأسعار</option>
-                            <option value="0-5000">حتى 5,000 ريال</option>
-                            <option value="5000-10000">5,000 - 10,000 ريال</option>
-                            <option value="10000-20000">10,000 - 20,000 ريال</option>
-                            <option value="20000+">أكثر من 20,000 ريال</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label>الغرف</label>
-                        <select>
-                            <option value="">جميع الغرف</option>
-                            <option value="studio">استوديو</option>
-                            <option value="1">1 غرفة</option>
-                            <option value="2">2 غرف</option>
-                            <option value="3">3 غرف</option>
-                            <option value="4+">4 غرف وأكثر</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label>المساحة (م²)</label>
-                        <select>
-                            <option value="">جميع المساحات</option>
-                            <option value="0-100">حتى 100 م²</option>
-                            <option value="100-200">100 - 200 م²</option>
-                            <option value="200-300">200 - 300 م²</option>
-                            <option value="300+">أكثر من 300 م²</option>
-                        </select>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label>الترتيب حسب</label>
-                        <select>
-                            <option value="newest">الأحدث</option>
-                            <option value="price-low">السعر: من الأقل للأعلى</option>
-                            <option value="price-high">السعر: من الأعلى للأقل</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="filter-buttons">
-                    <button class="btn-reset">إعادة تعيين</button>
-                    <button class="btn-search">بحث</button>
-                </div>
             </div>
             
             <!-- Properties Grid -->
@@ -1985,7 +1847,7 @@
                 <!-- Right Column -->
                 <div>
                     <!-- Owner Section -->
-                    <div class="owner-section" style="margin-top: 200px;">
+                    <div class="owner-section">
                         <h2 class="section-title">معلومات المالك</h2>
                         
                         <div class="owner-info">
@@ -2732,7 +2594,7 @@
                 performSearch();
             }
         });
-         
+        
         document.getElementById('sale-search-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 performSaleSearch();
