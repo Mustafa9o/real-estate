@@ -1759,6 +1759,7 @@
         let phoneNumberVisible = false;
         let currentPropertyId = null;
         let currentUser = null;
+        let userProfile = null;
         
         // Modal functions
         function showModal(modalId) {
@@ -1769,6 +1770,51 @@
             document.getElementById(modalId).style.display = 'none';
         }
         
+        // Function to get user profile from database
+        async function getUserProfile(userId) {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+                
+                if (error) {
+                    console.error('Error fetching user profile:', error);
+                    return null;
+                }
+                
+                return data;
+            } catch (err) {
+                console.error('Error in getUserProfile:', err);
+                return null;
+            }
+        }
+        
+        // Function to update user UI with profile data
+        async function updateUserUI(user) {
+            if (!user) {
+                document.getElementById('auth-buttons').style.display = 'flex';
+                document.getElementById('user-info').style.display = 'none';
+                return;
+            }
+
+            // Get user profile from database
+            userProfile = await getUserProfile(user.id);
+            
+            let displayName;
+            if (userProfile && userProfile.full_name) {
+                displayName = userProfile.full_name;
+            } else {
+                // Fallback to user metadata or email
+                displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'مستخدم';
+            }
+
+            document.getElementById('auth-buttons').style.display = 'none';
+            document.getElementById('user-info').style.display = 'flex';
+            document.getElementById('user-name').textContent = `مرحباً، ${displayName}`;
+        }
+        
         // Check if user is already logged in
         async function checkUserSession() {
             const { data: { session }, error } = await supabase.auth.getSession();
@@ -1776,9 +1822,7 @@
             if (session) {
                 // User is logged in
                 currentUser = session.user;
-                document.getElementById('auth-buttons').style.display = 'none';
-                document.getElementById('user-info').style.display = 'flex';
-                document.getElementById('user-name').textContent = `مرحباً، ${currentUser.full_name}`;
+                await updateUserUI(currentUser);
                 
                 // Ensure user has a profile
                 await ensureUserProfile(currentUser);
@@ -1797,18 +1841,24 @@
                 
                 // If profile doesn't exist, create it
                 if (profileError && profileError.code === 'PGRST116') {
+                    const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'مستخدم';
+                    
                     const { error: insertError } = await supabase
                         .from('profiles')
                         .insert([
                             { 
                                 id: user.id, 
-                                full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'مستخدم', 
+                                full_name: fullName, 
                                 email: user.email 
                             }
                         ]);
                     
                     if (insertError) {
                         console.error('Error creating profile:', insertError);
+                    } else {
+                        // Update user profile after creation
+                        userProfile = await getUserProfile(user.id);
+                        await updateUserUI(user);
                     }
                 }
             } catch (err) {
@@ -1940,9 +1990,7 @@
                 
                 // Update UI
                 currentUser = data.user;
-                document.getElementById('auth-buttons').style.display = 'none';
-                document.getElementById('user-info').style.display = 'flex';
-                document.getElementById('user-name').textContent = `مرحباً، ${currentUser.name}`;
+                await updateUserUI(currentUser);
                 
                 // Ensure user has a profile
                 await ensureUserProfile(currentUser);
@@ -1966,8 +2014,8 @@
                 
                 // Update UI
                 currentUser = null;
-                document.getElementById('auth-buttons').style.display = 'flex';
-                document.getElementById('user-info').style.display = 'none';
+                userProfile = null;
+                await updateUserUI(null);
                 
                 alert('تم تسجيل الخروج بنجاح');
             } catch (err) {
@@ -2887,26 +2935,22 @@
             checkUserSession();
             
             // Set up auth state change listener
-            supabase.auth.onAuthStateChange((event, session) => {
+            supabase.auth.onAuthStateChange(async (event, session) => {
                 if (event === 'SIGNED_IN') {
                     currentUser = session.user;
-                    document.getElementById('auth-buttons').style.display = 'none';
-                    document.getElementById('user-info').style.display = 'flex';
-                    document.getElementById('user-name').textContent = `مرحباً، ${currentUser.name}`;
+                    await updateUserUI(currentUser);
                     
                     // Ensure user has a profile
-                    ensureUserProfile(currentUser);
+                    await ensureUserProfile(currentUser);
                 } else if (event === 'SIGNED_OUT') {
                     currentUser = null;
-                    document.getElementById('auth-buttons').style.display = 'flex';
-                    document.getElementById('user-info').style.display = 'none';
+                    userProfile = null;
+                    await updateUserUI(null);
                 } else if (event === 'USER_UPDATED') {
                     // This event is triggered when email is confirmed
                     if (session && session.user && session.user.email_confirmed_at) {
                         currentUser = session.user;
-                        document.getElementById('auth-buttons').style.display = 'none';
-                        document.getElementById('user-info').style.display = 'flex';
-                        document.getElementById('user-name').textContent = `مرحباً، ${currentUser.full_name}`;
+                        await updateUserUI(currentUser);
                         alert('تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول.');
                     }
                 }
