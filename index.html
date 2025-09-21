@@ -1766,6 +1766,26 @@
             }
         }
         
+        // Function to resend confirmation email
+        async function resendConfirmationEmail(email) {
+            try {
+                const { error } = await supabase.auth.resend({
+                    type: 'signup',
+                    email: email,
+                });
+                
+                if (error) {
+                    console.error('Error resending confirmation email:', error);
+                    return false;
+                }
+                
+                return true;
+            } catch (err) {
+                console.error('Error:', err);
+                return false;
+            }
+        }
+        
         // Registration function
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1836,7 +1856,35 @@
                 });
                 
                 if (error) {
-                    alert('خطأ في تسجيل الدخول: ' + error.message);
+                    if (error.message === "Email not confirmed") {
+                        // Email not confirmed, show option to resend confirmation email
+                        const resendOption = confirm("بريدك الإلكتروني لم يتم تأكيده بعد. هل ترغب في إعادة إرسال رسالة التأكيد؟");
+                        if (resendOption) {
+                            const success = await resendConfirmationEmail(email);
+                            if (success) {
+                                alert("تم إعادة إرسال رسالة التأكيد إلى بريدك الإلكتروني. يرجى التحقق من بريدك الوارد.");
+                            } else {
+                                alert("حدث خطأ أثناء إعادة إرسال رسالة التأكيد. يرجى المحاولة مرة أخرى لاحقاً.");
+                            }
+                        }
+                        return;
+                    } else {
+                        alert('خطأ في تسجيل الدخول: ' + error.message);
+                        return;
+                    }
+                }
+                
+                // Check if email is confirmed
+                if (data.user && !data.user.email_confirmed_at) {
+                    const resendOption = confirm("بريدك الإلكتروني لم يتم تأكيده بعد. هل ترغب في إعادة إرسال رسالة التأكيد؟");
+                    if (resendOption) {
+                        const success = await resendConfirmationEmail(email);
+                        if (success) {
+                            alert("تم إعادة إرسال رسالة التأكيد إلى بريدك الإلكتروني. يرجى التحقق من بريدك الوارد.");
+                        } else {
+                            alert("حدث خطأ أثناء إعادة إرسال رسالة التأكيد. يرجى المحاولة مرة أخرى لاحقاً.");
+                        }
+                    }
                     return;
                 }
                 
@@ -2779,6 +2827,29 @@
             
             // Check if user is logged in
             checkUserSession();
+            
+            // Set up auth state change listener
+            supabase.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN') {
+                    currentUser = session.user;
+                    document.getElementById('auth-buttons').style.display = 'none';
+                    document.getElementById('user-info').style.display = 'flex';
+                    document.getElementById('user-name').textContent = `مرحباً، ${currentUser.email}`;
+                } else if (event === 'SIGNED_OUT') {
+                    currentUser = null;
+                    document.getElementById('auth-buttons').style.display = 'flex';
+                    document.getElementById('user-info').style.display = 'none';
+                } else if (event === 'USER_UPDATED') {
+                    // This event is triggered when email is confirmed
+                    if (session && session.user && session.user.email_confirmed_at) {
+                        currentUser = session.user;
+                        document.getElementById('auth-buttons').style.display = 'none';
+                        document.getElementById('user-info').style.display = 'flex';
+                        document.getElementById('user-name').textContent = `مرحباً، ${currentUser.email}`;
+                        alert('تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول.');
+                    }
+                }
+            });
         }
     </script>
 </body>
