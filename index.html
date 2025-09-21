@@ -1763,6 +1763,40 @@
                 document.getElementById('auth-buttons').style.display = 'none';
                 document.getElementById('user-info').style.display = 'flex';
                 document.getElementById('user-name').textContent = `مرحباً، ${currentUser.email}`;
+                
+                // Ensure user has a profile
+                await ensureUserProfile(currentUser);
+            }
+        }
+        
+        // Function to ensure user has a profile
+        async function ensureUserProfile(user) {
+            try {
+                // Check if profile exists
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('id', user.id)
+                    .single();
+                
+                // If profile doesn't exist, create it
+                if (profileError && profileError.code === 'PGRST116') {
+                    const { error: insertError } = await supabase
+                        .from('profiles')
+                        .insert([
+                            { 
+                                id: user.id, 
+                                full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'مستخدم', 
+                                email: user.email 
+                            }
+                        ]);
+                    
+                    if (insertError) {
+                        console.error('Error creating profile:', insertError);
+                    }
+                }
+            } catch (err) {
+                console.error('Error ensuring user profile:', err);
             }
         }
         
@@ -1894,6 +1928,9 @@
                 document.getElementById('user-info').style.display = 'flex';
                 document.getElementById('user-name').textContent = `مرحباً، ${currentUser.email}`;
                 
+                // Ensure user has a profile
+                await ensureUserProfile(currentUser);
+                
                 closeModal('login-modal');
                 document.getElementById('login-form').reset();
             } catch (err) {
@@ -1932,6 +1969,9 @@
             }
             
             try {
+                // Ensure user has a profile before adding to favorites
+                await ensureUserProfile(currentUser);
+                
                 const { error } = await supabase
                     .from('favorites')
                     .insert([
@@ -1943,6 +1983,7 @@
                     if (error.code === '23505') {
                         alert('العقار موجود بالفعل في قائمتك المفضلة');
                     } else {
+                        console.error('Error adding to favorites:', error);
                         alert('خطأ في إضافة العقار للمفضلة: ' + error.message);
                     }
                     return;
@@ -1951,6 +1992,7 @@
                 alert('تم إضافة العقار إلى قائمتك المفضلة');
                 updateFavoriteButton(propertyId, true);
             } catch (err) {
+                console.error('Error in addToFavorites:', err);
                 alert('حدث خطأ: ' + err.message);
             }
         }
@@ -2835,6 +2877,9 @@
                     document.getElementById('auth-buttons').style.display = 'none';
                     document.getElementById('user-info').style.display = 'flex';
                     document.getElementById('user-name').textContent = `مرحباً، ${currentUser.email}`;
+                    
+                    // Ensure user has a profile
+                    ensureUserProfile(currentUser);
                 } else if (event === 'SIGNED_OUT') {
                     currentUser = null;
                     document.getElementById('auth-buttons').style.display = 'flex';
