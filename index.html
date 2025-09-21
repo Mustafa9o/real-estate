@@ -2876,7 +2876,7 @@
                     currentUser = session.user;
                     document.getElementById('auth-buttons').style.display = 'none';
                     document.getElementById('user-info').style.display = 'flex';
-                    document.getElementById('user-name').textContent = `مرحباً، ${currentUser.email}`;
+                    document.getElementById('user-name').textContent = `مرحباً، ${currentUser.name}`;
                     
                     // Ensure user has a profile
                     ensureUserProfile(currentUser);
