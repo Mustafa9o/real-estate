@@ -480,13 +480,15 @@
             margin-left: 8px;
         }
         
-        /* Gallery */
+        /* Gallery - FIXED */
         .property-gallery {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 15px;
             margin-bottom: 30px;
             height: 400px;
+            overflow: hidden; /* Added to prevent overflow */
+            border-radius: 8px;
         }
         
         .main-image {
@@ -525,6 +527,7 @@
             grid-template-columns: 1fr;
             grid-template-rows: repeat(3, 1fr);
             gap: 15px;
+            height: 100%; /* Added to ensure full height */
         }
         
         .thumbnail {
@@ -532,6 +535,7 @@
             overflow: hidden;
             cursor: pointer;
             position: relative;
+            height: 100%; /* Added to ensure full height */
         }
         
         .thumbnail img {
@@ -558,12 +562,12 @@
             opacity: 1;
         }
         
-        /* Property Content */
+        /* Property Content - FIXED */
         .property-content {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 30px;
-            align-items: start;
+            margin-top: 30px; /* Added margin to separate from gallery */
         }
         
         /* Details Section */
@@ -640,13 +644,16 @@
             margin-left: 10px;
         }
         
-        /* Owner Info */
+        /* Owner Info - FIXED */
         .owner-section {
             background: white;
             border-radius: 8px;
             padding: 25px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
+            /* Removed margin-top:190px; */
+            position: sticky; /* Added to keep it visible while scrolling */
+            top: 20px; /* Added to position it properly */
         }
         
         .owner-info {
@@ -1092,6 +1099,11 @@
             .contact-container {
                 grid-template-columns: 1fr;
             }
+            
+            .owner-section {
+                position: static; /* Reset position for smaller screens */
+                margin-top: 0; /* Reset margin */
+            }
         }
         
         @media (max-width: 768px) {
@@ -1157,6 +1169,10 @@
             .owner-avatar {
                 margin-left: 0;
                 margin-bottom: 15px;
+            }
+            
+            .property-gallery {
+                height: 300px; /* Adjusted for smaller screens */
             }
         }
     </style>
@@ -1469,7 +1485,7 @@
                 <!-- Right Column -->
                 <div>
                     <!-- Owner Section -->
-                    <div class="owner-section" style="margin-top:190px;">
+                    <div class="owner-section">
                         <h2 class="section-title">معلومات المالك</h2>
                         
                         <div class="owner-info">
