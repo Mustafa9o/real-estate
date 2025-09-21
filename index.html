@@ -1926,7 +1926,7 @@
                 currentUser = data.user;
                 document.getElementById('auth-buttons').style.display = 'none';
                 document.getElementById('user-info').style.display = 'flex';
-                document.getElementById('user-name').textContent = `مرحباً، ${currentUser.email}`;
+                document.getElementById('user-name').textContent = `مرحباً، ${currentUser.full_name}`;
                 
                 // Ensure user has a profile
                 await ensureUserProfile(currentUser);
