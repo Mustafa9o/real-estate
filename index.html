@@ -100,6 +100,30 @@
             background-color: var(--light-color);
         }
         
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-left: 10px;
+        }
+        
+        .user-info button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .user-info button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
         /* Breadcrumb */
         .breadcrumb {
             padding: 15px 0;
@@ -239,6 +263,10 @@
         }
         
         .rent-listing {
+            display: none;
+        }
+        
+        .favorites-page {
             display: none;
         }
         
@@ -972,6 +1000,15 @@
             color: white;
         }
         
+        .btn-favorite.active {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-favorite.active:hover {
+            background: #c0392b;
+        }
+        
         .btn-share {
             background: #fff;
             color: #3498db;
@@ -992,6 +1029,43 @@
         .btn-print:hover {
             background: #777;
             color: white;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #777;
         }
         
         /* Responsive Design */
@@ -1085,43 +1159,6 @@
                 margin-bottom: 15px;
             }
         }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .close-modal {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #777;
-        }
     </style>
 </head>
 <body>
@@ -1137,13 +1174,18 @@
                     <li><a href="#" onclick="showHomePage(); return false;">الرئيسية</a></li>
                     <li><a href="#" onclick="showPropertiesListing(); return false;">عقارات للبيع</a></li>
                     <li><a href="#" onclick="showRentListing(); return false;">عقارات للإيجار</a></li>
+                    <li><a href="#" onclick="showFavorites(); return false;">عقاراتي المفضلة</a></li>
                     <li><a href="#">وكلاء عقاريون</a></li>
                     <li><a href="#" onclick="showContactPage(); return false;">اتصل بنا</a></li>
                 </ul>
             </nav>
-            <div class="auth-buttons">
-                <button>تسجيل الدخول</button>
-                <button>إنشاء حساب</button>
+            <div class="auth-buttons" id="auth-buttons">
+                <button onclick="showModal('login-modal')">تسجيل الدخول</button>
+                <button onclick="showModal('register-modal')">إنشاء حساب</button>
+            </div>
+            <div class="user-info" id="user-info" style="display: none;">
+                <span id="user-name">مرحباً</span>
+                <button onclick="logout()">تسجيل الخروج</button>
             </div>
         </div>
     </header>
@@ -1191,191 +1233,7 @@
             
             <!-- Properties Grid -->
             <div class="properties-grid" id="home-properties-grid">
-                <!-- Property 1 -->
-                <div class="property-card" data-type="sale" data-city="الرياض" data-district="الروضة" data-property-type="فيلا">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1176&q=80" alt="فيلا فاخرة">
-                        <div class="property-badge badge-sale">للبيع</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">فيلا فاخرة للبيع في حي الروضة</h3>
-                        <div class="property-card-price price-sale">1,250,000 ريال</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي الروضة، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>320 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>4 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>3 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('property1', 'sale')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Property 2 -->
-                <div class="property-card" data-type="rent" data-city="الرياض" data-district="النظيم" data-property-type="شقة">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="شقة مفروشة">
-                        <div class="property-badge badge-rent">للإيجار</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">شقة مفروشة للإيجار في حي النظيم</h3>
-                        <div class="property-card-price price-rent">18,000 ريال / شهرياً</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي النظيم، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>150 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>3 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>2 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('rent-property1', 'rent')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Property 3 -->
-                <div class="property-card" data-type="sale" data-city="الرياض" data-district="السفارات" data-property-type="شقة">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1084&q=80" alt="شقة فاخرة">
-                        <div class="property-badge badge-sale">للبيع</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">شقة فاخرة للبيع في حي السفارات</h3>
-                        <div class="property-card-price price-sale">850,000 ريال</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي السفارات، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>180 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>3 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>2 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('property2', 'sale')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Property 4 -->
-                <div class="property-card" data-type="rent" data-city="الرياض" data-district="المروج" data-property-type="فيلا">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="فيلا للإيجار">
-                        <div class="property-badge badge-rent">للإيجار</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">فيلا للإيجار في حي المروج</h3>
-                        <div class="property-card-price price-rent">35,000 ريال / شهرياً</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي المروج، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>350 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>5 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>4 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('rent-property2', 'rent')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Property 5 -->
-                <div class="property-card" data-type="sale" data-city="الرياض" data-district="النخيل" data-property-type="فيلا">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80" alt="فيلا حديثة">
-                        <div class="property-badge badge-sale">للبيع</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">فيلا حديثة للبيع في حي النخيل</h3>
-                        <div class="property-card-price price-sale">1,750,000 ريال</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي النخيل، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>400 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>5 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>4 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('property3', 'sale')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Property 6 -->
-                <div class="property-card" data-type="rent" data-city="الرياض" data-district="العليا" data-property-type="استوديو">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="استوديو للإيجار">
-                        <div class="property-badge badge-rent">للإيجار</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">استوديو للإيجار في حي العليا</h3>
-                        <div class="property-card-price price-rent">8,000 ريال / شهرياً</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي العليا، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>60 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>استوديو</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>1 حمام</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('rent-property3', 'rent')">عرض التفاصيل</button>
-                    </div>
-                </div>
+                <!-- Property cards will be dynamically loaded here -->
             </div>
             
             <!-- Call to Action -->
@@ -1413,129 +1271,7 @@
             
             <!-- Properties Grid -->
             <div class="properties-grid" id="sale-properties-grid">
-                <!-- Property 1 -->
-                <div class="property-card" data-type="sale" data-city="الرياض" data-district="الروضة" data-property-type="فيلا">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1176&q=80" alt="فيلا فاخرة">
-                        <div class="property-badge badge-sale">للبيع</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">فيلا فاخرة للبيع في حي الروضة</h3>
-                        <div class="property-card-price price-sale">1,250,000 ريال</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي الروضة، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>320 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>4 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>3 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('property1', 'sale')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Property 2 -->
-                <div class="property-card" data-type="sale" data-city="الرياض" data-district="السفارات" data-property-type="شقة">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1084&q=80" alt="شقة فاخرة">
-                        <div class="property-badge badge-sale">للبيع</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">شقة فاخرة للبيع في حي السفارات</h3>
-                        <div class="property-card-price price-sale">850,000 ريال</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي السفارات، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>180 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>3 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>2 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('property2', 'sale')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Property 3 -->
-                <div class="property-card" data-type="sale" data-city="الرياض" data-district="النخيل" data-property-type="فيلا">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80" alt="فيلا حديثة">
-                        <div class="property-badge badge-sale">للبيع</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">فيلا حديثة للبيع في حي النخيل</h3>
-                        <div class="property-card-price price-sale">1,750,000 ريال</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي النخيل، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>400 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>5 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>4 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('property3', 'sale')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Property 4 -->
-                <div class="property-card" data-type="sale" data-city="الرياض" data-district="العليا" data-property-type="شقة">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1560448076-3f6f44b6b4a4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80" alt="شقة دوبلكس">
-                        <div class="property-badge badge-sale">للبيع</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">شقة دوبلكس للبيع في حي العليا</h3>
-                        <div class="property-card-price price-sale">1,100,000 ريال</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي العليا، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>240 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>4 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>3 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('property4', 'sale')">عرض التفاصيل</button>
-                    </div>
-                </div>
+                <!-- Property cards will be dynamically loaded here -->
             </div>
         </div>
         
@@ -1559,129 +1295,15 @@
             
             <!-- Properties Grid -->
             <div class="properties-grid" id="rent-properties-grid">
-                <!-- Rent Property 1 -->
-                <div class="property-card" data-type="rent" data-city="الرياض" data-district="النظيم" data-property-type="شقة">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="شقة مفروشة">
-                        <div class="property-badge badge-rent">للإيجار</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">شقة مفروشة للإيجار في حي النظيم</h3>
-                        <div class="property-card-price price-rent">18,000 ريال / شهرياً</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي النظيم، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>150 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>3 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>2 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('rent-property1', 'rent')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Rent Property 2 -->
-                <div class="property-card" data-type="rent" data-city="الرياض" data-district="المروج" data-property-type="فيلا">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="فيلا للإيجار">
-                        <div class="property-badge badge-rent">للإيجار</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">فيلا للإيجار في حي المروج</h3>
-                        <div class="property-card-price price-rent">35,000 ريال / شهرياً</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي المروج، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>350 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>5 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>4 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('rent-property2', 'rent')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Rent Property 3 -->
-                <div class="property-card" data-type="rent" data-city="الرياض" data-district="العليا" data-property-type="استوديو">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="استوديو للإيجار">
-                        <div class="property-badge badge-rent">للإيجار</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">استوديو للإيجار في حي العليا</h3>
-                        <div class="property-card-price price-rent">8,000 ريال / شهرياً</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي العليا، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>60 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>استوديو</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>1 حمام</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('rent-property3', 'rent')">عرض التفاصيل</button>
-                    </div>
-                </div>
-                
-                <!-- Rent Property 4 -->
-                <div class="property-card" data-type="rent" data-city="الرياض" data-district="الملز" data-property-type="شقة">
-                    <div class="property-image">
-                        <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="شقة دوبلكس للإيجار">
-                        <div class="property-badge badge-rent">للإيجار</div>
-                    </div>
-                    <div class="property-content">
-                        <h3 class="property-card-title">شقة دوبلكس للإيجار في حي الملز</h3>
-                        <div class="property-card-price price-rent">22,000 ريال / شهرياً</div>
-                        <div class="property-card-address">
-                            <i class="fas fa-map-marker-alt"></i>
-                            حي الملز، الرياض
-                        </div>
-                        <div class="property-card-features">
-                            <div class="property-feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <span>220 م²</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bed"></i>
-                                <span>4 غرف</span>
-                            </div>
-                            <div class="property-feature">
-                                <i class="fas fa-bath"></i>
-                                <span>3 حمامات</span>
-                            </div>
-                        </div>
-                        <button class="view-details-btn" onclick="showPropertyDetails('rent-property4', 'rent')">عرض التفاصيل</button>
-                    </div>
-                </div>
+                <!-- Property cards will be dynamically loaded here -->
+            </div>
+        </div>
+        
+        <!-- Favorites Page -->
+        <div id="favorites-page" class="favorites-page">
+            <h1 class="page-title">عقاراتي المفضلة</h1>
+            <div class="properties-grid" id="favorites-grid">
+                <!-- Favorite properties will be loaded here -->
             </div>
         </div>
         
@@ -1703,7 +1325,7 @@
             
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="action-btn btn-favorite">
+                <button class="action-btn btn-favorite" id="detail-favorite-btn">
                     <i class="fas fa-heart"></i> حفظ العقار
                 </button>
                 <button class="action-btn btn-share">
@@ -2050,119 +1672,526 @@
         </div>
     </footer>
 
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>تسجيل الدخول</h2>
+                <span class="close-modal" onclick="closeModal('login-modal')">&times;</span>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">دخول</button>
+                <p style="text-align: center; margin-top: 15px;">
+                    ليس لديك حساب؟ <a href="#" onclick="showModal('register-modal'); closeModal('login-modal')">إنشاء حساب</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إنشاء حساب جديد</h2>
+                <span class="close-modal" onclick="closeModal('register-modal')">&times;</span>
+            </div>
+            <form id="register-form">
+                <div class="form-group">
+                    <label>الاسم الكامل</label>
+                    <input type="text" id="register-name" required>
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <div class="form-group">
+                    <label>تأكيد كلمة المرور</label>
+                    <input type="password" id="register-password-confirm" required>
+                </div>
+                <button type="submit" class="btn btn-primary">إنشاء حساب</button>
+                <p style="text-align: center; margin-top: 15px;">
+                    لديك حساب بالفعل؟ <a href="#" onclick="showModal('login-modal'); closeModal('register-modal')">تسجيل الدخول</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        // Property data
-        const propertiesData = {
-            'property1': {
-                title: 'فيلا فاخرة للبيع في حي الروضة',
-                price: '1,250,000 ريال',
-                address: 'حي الروضة، الرياض، المملكة العربية السعودية',
-                description: 'فيلا فاخرة للبيع في حي الروضة، مساحة الأرض 320 متر مربع، مكونة من دورين، تحتوي على 4 غرف نوم و3 حمامات وصالة كبيرة ومطبخ مجهز بأحدث الأجهزة. الفيلا تتميز بتصميمها العصري وتشطيبها الفاخر، وتطل على شارع رئيسي مع موقفين للسيارات. الموقع ممتاز وقريب من الخدمات والمرافق العامة مثل المدارس والمستشفيات والمراكز التجارية.',
-                type: 'sale',
-                owner: {
-                    name: 'محمد أحمد',
-                    phone: '+966 55 123 4567',
-                    email: 'mohamed.ahmed@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                }
-            },
-            'property2': {
-                title: 'شقة فاخرة للبيع في حي السفارات',
-                price: '850,000 ريال',
-                address: 'حي السفارات، الرياض، المملكة العربية السعودية',
-                description: 'شقة فاخرة للبيع في حي السفارات، مساحة 180 متر مربع، تتكون من 3 غرف نوم و2 حمام وصالة ومطبخ. الشقة تقع في طابق علوي وتطل على إطلالة خلابة، وتتميز بتصميمها العصري وتشطيبها الفاخر. الموقع ممتاز وقريب من السفارات والمراكز التجارية.',
-                type: 'sale',
-                owner: {
-                    name: 'سامي عبدالله',
-                    phone: '+966 50 987 6543',
-                    email: 'sami.abdullah@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                }
-            },
-            'property3': {
-                title: 'فيلا حديثة للبيع في حي النخيل',
-                price: '1,750,000 ريال',
-                address: 'حي النخيل، الرياض، المملكة العربية السعودية',
-                description: 'فيلا حديثة للبيع في حي النخيل، مساحة الأرض 400 متر مربع، مكونة من دورين، تحتوي على 5 غرف نوم و4 حمامات وصالة كبيرة ومطبخ مجهز وغرفة خادمة. الفيلا تتميز بتصميمها الحديث وتشطيبها الفاخر، وتحتوي على حديقة خاصة ومسبح. الموقع ممتاز وقريب من المدارس والمستشفيات.',
-                type: 'sale',
-                owner: {
-                    name: 'عبدالرحمن خالد',
-                    phone: '+966 53 456 7890',
-                    email: 'abdulrahman.khaled@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                }
-            },
-            'property4': {
-                title: 'شقة دوبلكس للبيع في حي العليا',
-                price: '1,100,000 ريال',
-                address: 'حي العليا، الرياض، المملكة العربية السعودية',
-                description: 'شقة دوبلكس للبيع في حي العليا، مساحة 240 متر مربع، تتكون من 4 غرف نوم و3 حمامات وصالة ومطبخ. الشقة تتميز بتصميمها الفاخر وتشطيبها عالي الجودة، وتطل على إطلالة رائعة. الموقع ممتاز وقريب من المرافق العامة والخدمات.',
-                type: 'sale',
-                owner: {
-                    name: 'فهد سالم',
-                    phone: '+966 54 321 0987',
-                    email: 'fahad.salem@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                }
-            },
-            'rent-property1': {
-                title: 'شقة مفروشة للإيجار في حي النظيم',
-                price: '18,000 ريال / شهرياً',
-                address: 'حي النظيم، الرياض، المملكة العربية السعودية',
-                description: 'شقة مفروشة للإيجار في حي النظيم، مساحة 150 متر مربع، تتكون من 3 غرف نوم و2 حمام وصالة ومطبخ مجهز بالكامل. الشقة مفروشة بأثاث عصري وجميع الأجهزة الكهربائية متوفرة. الموقع ممتاز وقريب من جميع الخدمات والمرافق العامة.',
-                type: 'rent',
-                owner: {
-                    name: 'خالد محمد',
-                    phone: '+966 55 111 2233',
-                    email: 'khaled.mohamed@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                }
-            },
-            'rent-property2': {
-                title: 'فيلا للإيجار في حي المروج',
-                price: '35,000 ريال / شهرياً',
-                address: 'حي المروج، الرياض، المملكة العربية السعودية',
-                description: 'فيلا للإيجار في حي المروج، مساحة الأرض 350 متر مربع، مكونة من دورين، تحتوي على 5 غرف نوم و4 حمامات وصالة كبيرة ومطبخ مجهز وغرفة خادمة. الفيلا تتميز بحديقتها الواسعة ومسبحها الخاص، وتقع في حي هادئ وأنيق. الموقع ممتاز وقريب من المدارس والمستشفيات.',
-                type: 'rent',
-                owner: {
-                    name: 'ناصر أحمد',
-                    phone: '+966 50 444 5566',
-                    email: 'nasser.ahmed@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1557862921-37829c790f19?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                }
-            },
-            'rent-property3': {
-                title: 'استوديو للإيجار في حي العليا',
-                price: '8,000 ريال / شهرياً',
-                address: 'حي العليا، الرياض، المملكة العربية السعودية',
-                description: 'استوديو للإيجار في حي العليا، مساحة 60 متر مربع، يتكون من غرفة نوم واحدة مع حمام ومطبخ صغير. الاستوديو مفروش بشكل عصري وجميع الأجهزة الكهربائية متوفرة. الموقع ممتاز وقريب من المرافق العامة والخدمات، ومناسب للعزاب أو الطلاب.',
-                type: 'rent',
-                owner: {
-                    name: 'يوسف عبدالله',
-                    phone: '+966 53 777 8899',
-                    email: 'yousef.abdullah@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                }
-            },
-            'rent-property4': {
-                title: 'شقة دوبلكس للإيجار في حي الملز',
-                price: '22,000 ريال / شهرياً',
-                address: 'حي الملز، الرياض، المملكة العربية السعودية',
-                description: 'شقة دوبلكس للإيجار في حي الملز، مساحة 220 متر مربع، تتكون من 4 غرف نوم و3 حمامات وصالة ومطبخ مجهز. الشقة تتميز بتصميمها العصري وتشطيبها الجيد، وتطل على إطلالة رائعة. الموقع ممتاز وقريب من جميع الخدمات والمرافق العامة.',
-                type: 'rent',
-                owner: {
-                    name: 'عمر سعيد',
-                    phone: '+966 54 222 3344',
-                    email: 'omar.saeed@example.com',
-                    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
-                }
-            }
-        };
+        // Initialize Supabase
+        const supabaseUrl = 'https://oanuujxhmxngstijciie.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hbnV1anhobXhuZ3N0aWpjaWllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDc2NjAsImV4cCI6MjA3NDAyMzY2MH0.kiv8JpUxtTdDwDJTsMoDTb2vYNWbQMH19lzfYv7Xdzs';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         
         // Track current listing type
         let currentListingType = 'sale';
         let phoneNumberVisible = false;
+        let currentPropertyId = null;
+        
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Check if user is already logged in
+        async function checkUserSession() {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+                // User is logged in
+                document.getElementById('auth-buttons').style.display = 'none';
+                document.getElementById('user-info').style.display = 'flex';
+                document.getElementById('user-name').textContent = `مرحباً، ${user.email}`;
+            }
+        }
+        
+        // Registration function
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-password-confirm').value;
+            
+            if (password !== confirmPassword) {
+                alert('كلمتا المرور غير متطابقتين');
+                return;
+            }
+            
+            try {
+                // Register user
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: name
+                        }
+                    }
+                });
+                
+                if (error) {
+                    alert('خطأ في التسجيل: ' + error.message);
+                    return;
+                }
+                
+                // Create user profile in the database
+                if (data.user) {
+                    const { error: profileError } = await supabase
+                        .from('profiles')
+                        .insert([
+                            { 
+                                id: data.user.id, 
+                                full_name: name, 
+                                email: email 
+                            }
+                        ]);
+                        
+                    if (profileError) {
+                        console.error('Error creating profile:', profileError);
+                    }
+                }
+                
+                alert('تم إنشاء الحساب بنجاح! يرجى تفعيل حسابك عبر البريد الإلكتروني.');
+                closeModal('register-modal');
+                document.getElementById('register-form').reset();
+            } catch (err) {
+                alert('حدث خطأ: ' + err.message);
+            }
+        });
+
+        // Login function
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) {
+                    alert('خطأ في تسجيل الدخول: ' + error.message);
+                    return;
+                }
+                
+                // Update UI
+                document.getElementById('auth-buttons').style.display = 'none';
+                document.getElementById('user-info').style.display = 'flex';
+                document.getElementById('user-name').textContent = `مرحباً، ${data.user.email}`;
+                
+                closeModal('login-modal');
+                document.getElementById('login-form').reset();
+            } catch (err) {
+                alert('حدث خطأ: ' + err.message);
+            }
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    alert('خطأ في تسجيل الخروج: ' + error.message);
+                    return;
+                }
+                
+                // Update UI
+                document.getElementById('auth-buttons').style.display = 'flex';
+                document.getElementById('user-info').style.display = 'none';
+                
+                alert('تم تسجيل الخروج بنجاح');
+            } catch (err) {
+                alert('حدث خطأ: ' + err.message);
+            }
+        }
+        
+        // Function to add property to favorites
+        async function addToFavorites(propertyId) {
+            // Check if user is logged in
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                alert('يرجى تسجيل الدخول لحفظ العقارات المفضلة');
+                showModal('login-modal');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('favorites')
+                    .insert([
+                        { user_id: user.id, property_id: propertyId }
+                    ]);
+                    
+                if (error) {
+                    // Check if it's a duplicate entry
+                    if (error.code === '23505') {
+                        alert('العقار موجود بالفعل في قائمتك المفضلة');
+                    } else {
+                        alert('خطأ في إضافة العقار للمفضلة: ' + error.message);
+                    }
+                    return;
+                }
+                
+                alert('تم إضافة العقار إلى قائمتك المفضلة');
+                updateFavoriteButton(propertyId, true);
+            } catch (err) {
+                alert('حدث خطأ: ' + err.message);
+            }
+        }
+
+        // Function to remove property from favorites
+        async function removeFromFavorites(propertyId) {
+            // Check if user is logged in
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('favorites')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .eq('property_id', propertyId);
+                    
+                if (error) {
+                    alert('خطأ في إزالة العقار من المفضلة: ' + error.message);
+                    return;
+                }
+                
+                alert('تم إزالة العقار من قائمتك المفضلة');
+                updateFavoriteButton(propertyId, false);
+            } catch (err) {
+                alert('حدث خطأ: ' + err.message);
+            }
+        }
+
+        // Function to check if property is in user's favorites
+        async function checkIfFavorite(propertyId) {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                return false;
+            }
+            
+            try {
+                const { data, error } = await supabase
+                    .from('favorites')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('property_id', propertyId)
+                    .single();
+                    
+                if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+                    console.error('Error checking favorite:', error);
+                    return false;
+                }
+                
+                return !!data;
+            } catch (err) {
+                console.error('Error:', err);
+                return false;
+            }
+        }
+
+        // Function to update favorite button state
+        function updateFavoriteButton(propertyId, isFavorite) {
+            const favoriteButtons = document.querySelectorAll(`[data-property-id="${propertyId}"] .btn-favorite`);
+            const detailFavoriteBtn = document.getElementById('detail-favorite-btn');
+            
+            favoriteButtons.forEach(button => {
+                if (isFavorite) {
+                    button.innerHTML = '<i class="fas fa-heart"></i> إزالة من المفضلة';
+                    button.classList.add('active');
+                    button.onclick = () => removeFromFavorites(propertyId);
+                } else {
+                    button.innerHTML = '<i class="fas fa-heart"></i> حفظ العقار';
+                    button.classList.remove('active');
+                    button.onclick = () => addToFavorites(propertyId);
+                }
+            });
+            
+            // Update detail page button if it exists
+            if (detailFavoriteBtn && currentPropertyId === propertyId) {
+                if (isFavorite) {
+                    detailFavoriteBtn.innerHTML = '<i class="fas fa-heart"></i> إزالة من المفضلة';
+                    detailFavoriteBtn.classList.add('active');
+                    detailFavoriteBtn.onclick = () => removeFromFavorites(propertyId);
+                } else {
+                    detailFavoriteBtn.innerHTML = '<i class="fas fa-heart"></i> حفظ العقار';
+                    detailFavoriteBtn.classList.remove('active');
+                    detailFavoriteBtn.onclick = () => addToFavorites(propertyId);
+                }
+            }
+        }
+
+        // Function to show user's favorite properties
+        async function showFavorites() {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                alert('يرجى تسجيل الدخول لعرض عقاراتك المفضلة');
+                showModal('login-modal');
+                return;
+            }
+            
+            // Hide other pages
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('properties-listing').style.display = 'none';
+            document.getElementById('rent-listing').style.display = 'none';
+            document.getElementById('property-detail').style.display = 'none';
+            document.getElementById('contact-page').style.display = 'none';
+            
+            // Show favorites page
+            document.getElementById('favorites-page').style.display = 'block';
+            
+            // Update breadcrumb
+            document.getElementById('breadcrumb-list').innerHTML = `
+                <li><a onclick="showHomePage()">الرئيسية</a></li>
+                <li>عقاراتي المفضلة</li>
+            `;
+            
+            try {
+                // Get user's favorites with property details
+                const { data, error } = await supabase
+                    .from('favorites')
+                    .select(`
+                        id,
+                        property_id,
+                        properties (
+                            id,
+                            title,
+                            price,
+                            type,
+                            area,
+                            bedrooms,
+                            bathrooms,
+                            city,
+                            district,
+                            image_urls
+                        )
+                    `)
+                    .eq('user_id', user.id);
+                    
+                if (error) {
+                    alert('خطأ في جلب العقارات المفضلة: ' + error.message);
+                    return;
+                }
+                
+                const favoritesGrid = document.getElementById('favorites-grid');
+                favoritesGrid.innerHTML = '';
+                
+                if (data.length === 0) {
+                    favoritesGrid.innerHTML = `
+                        <div class="no-results" style="grid-column: 1/-1;">
+                            <i class="fas fa-heart"></i>
+                            <h3>لا توجد عقارات مفضلة</h3>
+                            <p>لم تقم بحفظ أي عقار في قائمتك المفضلة بعد.</p>
+                            <button class="btn btn-primary" onclick="showHomePage()" style="margin-top: 15px;">
+                                تصفح العقارات
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display favorite properties
+                data.forEach(fav => {
+                    const property = fav.properties;
+                    const imageUrl = property.image_urls && property.image_urls.length > 0 
+                        ? property.image_urls[0] 
+                        : 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
+                    
+                    const propertyCard = document.createElement('div');
+                    propertyCard.className = 'property-card';
+                    propertyCard.setAttribute('data-property-id', property.id);
+                    propertyCard.innerHTML = `
+                        <div class="property-image">
+                            <img src="${imageUrl}" alt="${property.title}">
+                            <div class="property-badge badge-${property.type}">${property.type === 'sale' ? 'للبيع' : 'للإيجار'}</div>
+                        </div>
+                        <div class="property-content">
+                            <h3 class="property-card-title">${property.title}</h3>
+                            <div class="property-card-price price-${property.type}">
+                                ${property.price.toLocaleString()} ريال ${property.type === 'rent' ? '/ شهرياً' : ''}
+                            </div>
+                            <div class="property-card-address">
+                                <i class="fas fa-map-marker-alt"></i>
+                                ${property.district}، ${property.city}
+                            </div>
+                            <div class="property-card-features">
+                                <div class="property-feature">
+                                    <i class="fas fa-ruler-combined"></i>
+                                    <span>${property.area} م²</span>
+                                </div>
+                                ${property.bedrooms ? `
+                                <div class="property-feature">
+                                    <i class="fas fa-bed"></i>
+                                    <span>${property.bedrooms} غرف</span>
+                                </div>
+                                ` : ''}
+                                ${property.bathrooms ? `
+                                <div class="property-feature">
+                                    <i class="fas fa-bath"></i>
+                                    <span>${property.bathrooms} حمامات</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="view-details-btn" onclick="showPropertyDetails('${property.id}', '${property.type}')" style="flex: 1;">
+                                    عرض التفاصيل
+                                </button>
+                                <button class="btn-favorite active" onclick="removeFromFavorites('${property.id}')" style="width: auto; padding: 10px 15px;">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    favoritesGrid.appendChild(propertyCard);
+                });
+            } catch (err) {
+                alert('حدث خطأ: ' + err.message);
+            }
+        }
+        
+        // Function to fetch properties from Supabase
+        async function fetchProperties(type = null) {
+            let query = supabase.from('properties').select('*');
+            
+            if (type) {
+                query = query.eq('type', type);
+            }
+            
+            const { data, error } = await query;
+            
+            if (error) {
+                console.error('Error fetching properties:', error);
+                return [];
+            }
+            
+            return data;
+        }
+        
+        // Function to create property card HTML
+        function createPropertyCard(property) {
+            const imageUrl = property.image_urls && property.image_urls.length > 0 
+                ? property.image_urls[0] 
+                : 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
+            
+            const propertyCard = document.createElement('div');
+            propertyCard.className = 'property-card';
+            propertyCard.setAttribute('data-property-id', property.id);
+            propertyCard.innerHTML = `
+                <div class="property-image">
+                    <img src="${imageUrl}" alt="${property.title}">
+                    <div class="property-badge badge-${property.type}">${property.type === 'sale' ? 'للبيع' : 'للإيجار'}</div>
+                </div>
+                <div class="property-content">
+                    <h3 class="property-card-title">${property.title}</h3>
+                    <div class="property-card-price price-${property.type}">
+                        ${property.price.toLocaleString()} ريال ${property.type === 'rent' ? '/ شهرياً' : ''}
+                    </div>
+                    <div class="property-card-address">
+                        <i class="fas fa-map-marker-alt"></i>
+                        ${property.district}، ${property.city}
+                    </div>
+                    <div class="property-card-features">
+                        <div class="property-feature">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>${property.area} م²</span>
+                        </div>
+                        ${property.bedrooms ? `
+                        <div class="property-feature">
+                            <i class="fas fa-bed"></i>
+                            <span>${property.bedrooms} غرف</span>
+                        </div>
+                        ` : ''}
+                        ${property.bathrooms ? `
+                        <div class="property-feature">
+                            <i class="fas fa-bath"></i>
+                            <span>${property.bathrooms} حمامات</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="view-details-btn" onclick="showPropertyDetails('${property.id}', '${property.type}')" style="flex: 1;">
+                            عرض التفاصيل
+                        </button>
+                        <button class="btn-favorite" onclick="addToFavorites('${property.id}')" style="width: auto; padding: 10px 15px;">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return propertyCard;
+        }
         
         // Function to show home page
         function showHomePage() {
@@ -2171,6 +2200,7 @@
             document.getElementById('rent-listing').style.display = 'none';
             document.getElementById('property-detail').style.display = 'none';
             document.getElementById('contact-page').style.display = 'none';
+            document.getElementById('favorites-page').style.display = 'none';
             document.getElementById('search-results').style.display = 'none';
             document.getElementById('sale-search-results').style.display = 'none';
             document.getElementById('rent-search-results').style.display = 'none';
@@ -2179,15 +2209,34 @@
             document.getElementById('breadcrumb-list').innerHTML = `
                 <li><a onclick="showHomePage()">الرئيسية</a></li>
             `;
+            
+            // Load properties
+            loadHomePageProperties();
+        }
+        
+        // Function to load properties for home page
+        async function loadHomePageProperties() {
+            const propertiesGrid = document.getElementById('home-properties-grid');
+            propertiesGrid.innerHTML = '';
+            
+            // Fetch properties from Supabase
+            const properties = await fetchProperties();
+            
+            // Display properties
+            properties.forEach(property => {
+                const propertyCard = createPropertyCard(property);
+                propertiesGrid.appendChild(propertyCard);
+            });
         }
         
         // Function to show properties listing (for sale)
-        function showPropertiesListing() {
+        async function showPropertiesListing() {
             document.getElementById('home-page').style.display = 'none';
             document.getElementById('properties-listing').style.display = 'block';
             document.getElementById('rent-listing').style.display = 'none';
             document.getElementById('property-detail').style.display = 'none';
             document.getElementById('contact-page').style.display = 'none';
+            document.getElementById('favorites-page').style.display = 'none';
             document.getElementById('search-results').style.display = 'none';
             document.getElementById('sale-search-results').style.display = 'none';
             document.getElementById('rent-search-results').style.display = 'none';
@@ -2199,15 +2248,29 @@
                 <li><a onclick="showHomePage()">الرئيسية</a></li>
                 <li><a onclick="showPropertiesListing()">عقارات للبيع</a></li>
             `;
+            
+            // Load properties
+            const propertiesGrid = document.getElementById('sale-properties-grid');
+            propertiesGrid.innerHTML = '';
+            
+            // Fetch properties from Supabase
+            const properties = await fetchProperties('sale');
+            
+            // Display properties
+            properties.forEach(property => {
+                const propertyCard = createPropertyCard(property);
+                propertiesGrid.appendChild(propertyCard);
+            });
         }
         
         // Function to show rent properties listing
-        function showRentListing() {
+        async function showRentListing() {
             document.getElementById('home-page').style.display = 'none';
             document.getElementById('properties-listing').style.display = 'none';
             document.getElementById('rent-listing').style.display = 'block';
             document.getElementById('property-detail').style.display = 'none';
             document.getElementById('contact-page').style.display = 'none';
+            document.getElementById('favorites-page').style.display = 'none';
             document.getElementById('search-results').style.display = 'none';
             document.getElementById('sale-search-results').style.display = 'none';
             document.getElementById('rent-search-results').style.display = 'none';
@@ -2219,6 +2282,19 @@
                 <li><a onclick="showHomePage()">الرئيسية</a></li>
                 <li><a onclick="showRentListing()">عقارات للإيجار</a></li>
             `;
+            
+            // Load properties
+            const propertiesGrid = document.getElementById('rent-properties-grid');
+            propertiesGrid.innerHTML = '';
+            
+            // Fetch properties from Supabase
+            const properties = await fetchProperties('rent');
+            
+            // Display properties
+            properties.forEach(property => {
+                const propertyCard = createPropertyCard(property);
+                propertiesGrid.appendChild(propertyCard);
+            });
         }
         
         // Function to show contact page
@@ -2228,6 +2304,7 @@
             document.getElementById('rent-listing').style.display = 'none';
             document.getElementById('property-detail').style.display = 'none';
             document.getElementById('contact-page').style.display = 'block';
+            document.getElementById('favorites-page').style.display = 'none';
             document.getElementById('search-results').style.display = 'none';
             document.getElementById('sale-search-results').style.display = 'none';
             document.getElementById('rent-search-results').style.display = 'none';
@@ -2255,7 +2332,8 @@
             
             // Show/hide properties based on filter
             properties.forEach(property => {
-                if (type === 'all' || property.getAttribute('data-type') === type) {
+                const propertyType = property.getAttribute('data-type');
+                if (type === 'all' || propertyType === type) {
                     property.style.display = 'block';
                 } else {
                     property.style.display = 'none';
@@ -2264,7 +2342,7 @@
         }
         
         // Function to perform search on home page
-        function performSearch() {
+        async function performSearch() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
             
             if (searchTerm === '') {
@@ -2272,30 +2350,26 @@
                 return;
             }
             
-            // Get all property cards from home page
-            const propertyCards = document.querySelectorAll('#home-properties-grid .property-card');
+            // Fetch properties from Supabase
+            const properties = await fetchProperties();
             const resultsContainer = document.getElementById('search-results-container');
             resultsContainer.innerHTML = '';
             
             let foundResults = false;
             
-            propertyCards.forEach(card => {
-                const title = card.querySelector('.property-card-title').textContent.toLowerCase();
-                const address = card.querySelector('.property-card-address').textContent.toLowerCase();
-                const city = card.getAttribute('data-city').toLowerCase();
-                const district = card.getAttribute('data-district').toLowerCase();
-                const propertyType = card.getAttribute('data-property-type').toLowerCase();
+            properties.forEach(property => {
+                const title = property.title.toLowerCase();
+                const address = `${property.district}، ${property.city}`.toLowerCase();
+                const propertyType = property.property_type.toLowerCase();
                 
                 // Check if search term matches any property attribute
                 if (title.includes(searchTerm) || 
                     address.includes(searchTerm) || 
-                    city.includes(searchTerm) || 
-                    district.includes(searchTerm) || 
                     propertyType.includes(searchTerm)) {
                     
-                    // Clone the card and add to results
-                    const clonedCard = card.cloneNode(true);
-                    resultsContainer.appendChild(clonedCard);
+                    // Create property card and add to results
+                    const propertyCard = createPropertyCard(property);
+                    resultsContainer.appendChild(propertyCard);
                     foundResults = true;
                 }
             });
@@ -2319,48 +2393,38 @@
         }
         
         // Function to perform search on sale properties page
-        function performSaleSearch() {
+        async function performSaleSearch() {
             const searchTerm = document.getElementById('sale-search-input').value.toLowerCase().trim();
             
             if (searchTerm === '') {
                 document.getElementById('sale-search-results').style.display = 'none';
                 // Show all properties if search term is empty
-                const allProperties = document.querySelectorAll('#sale-properties-grid .property-card');
-                allProperties.forEach(property => {
-                    property.style.display = 'block';
-                });
+                showPropertiesListing();
                 return;
             }
             
-            // Get all property cards from sale page
-            const propertyCards = document.querySelectorAll('#sale-properties-grid .property-card');
+            // Fetch properties from Supabase
+            const properties = await fetchProperties('sale');
             const resultsContainer = document.getElementById('sale-search-results-container');
             resultsContainer.innerHTML = '';
             
             let foundResults = false;
             
-            propertyCards.forEach(card => {
-                const title = card.querySelector('.property-card-title').textContent.toLowerCase();
-                const address = card.querySelector('.property-card-address').textContent.toLowerCase();
-                const city = card.getAttribute('data-city').toLowerCase();
-                const district = card.getAttribute('data-district').toLowerCase();
-                const propertyType = card.getAttribute('data-property-type').toLowerCase();
+            properties.forEach(property => {
+                const title = property.title.toLowerCase();
+                const address = `${property.district}، ${property.city}`.toLowerCase();
+                const propertyType = property.property_type.toLowerCase();
                 
                 // Check if search term matches any property attribute
                 if (title.includes(searchTerm) || 
                     address.includes(searchTerm) || 
-                    city.includes(searchTerm) || 
-                    district.includes(searchTerm) || 
                     propertyType.includes(searchTerm)) {
                     
-                    // Clone the card and add to results
-                    const clonedCard = card.cloneNode(true);
-                    resultsContainer.appendChild(clonedCard);
+                    // Create property card and add to results
+                    const propertyCard = createPropertyCard(property);
+                    resultsContainer.appendChild(propertyCard);
                     foundResults = true;
                 }
-                
-                // Hide property if it doesn't match search
-                card.style.display = 'none';
             });
             
             // Show search results section
@@ -2382,48 +2446,38 @@
         }
         
         // Function to perform search on rent properties page
-        function performRentSearch() {
+        async function performRentSearch() {
             const searchTerm = document.getElementById('rent-search-input').value.toLowerCase().trim();
             
             if (searchTerm === '') {
                 document.getElementById('rent-search-results').style.display = 'none';
                 // Show all properties if search term is empty
-                const allProperties = document.querySelectorAll('#rent-properties-grid .property-card');
-                allProperties.forEach(property => {
-                    property.style.display = 'block';
-                });
+                showRentListing();
                 return;
             }
             
-            // Get all property cards from rent page
-            const propertyCards = document.querySelectorAll('#rent-properties-grid .property-card');
+            // Fetch properties from Supabase
+            const properties = await fetchProperties('rent');
             const resultsContainer = document.getElementById('rent-search-results-container');
             resultsContainer.innerHTML = '';
             
             let foundResults = false;
             
-            propertyCards.forEach(card => {
-                const title = card.querySelector('.property-card-title').textContent.toLowerCase();
-                const address = card.querySelector('.property-card-address').textContent.toLowerCase();
-                const city = card.getAttribute('data-city').toLowerCase();
-                const district = card.getAttribute('data-district').toLowerCase();
-                const propertyType = card.getAttribute('data-property-type').toLowerCase();
+            properties.forEach(property => {
+                const title = property.title.toLowerCase();
+                const address = `${property.district}، ${property.city}`.toLowerCase();
+                const propertyType = property.property_type.toLowerCase();
                 
                 // Check if search term matches any property attribute
                 if (title.includes(searchTerm) || 
                     address.includes(searchTerm) || 
-                    city.includes(searchTerm) || 
-                    district.includes(searchTerm) || 
                     propertyType.includes(searchTerm)) {
                     
-                    // Clone the card and add to results
-                    const clonedCard = card.cloneNode(true);
-                    resultsContainer.appendChild(clonedCard);
+                    // Create property card and add to results
+                    const propertyCard = createPropertyCard(property);
+                    resultsContainer.appendChild(propertyCard);
                     foundResults = true;
                 }
-                
-                // Hide property if it doesn't match search
-                card.style.display = 'none';
             });
             
             // Show search results section
@@ -2445,30 +2499,42 @@
         }
         
         // Function to show property details and hide listing
-        function showPropertyDetails(propertyId, propertyType) {
+        async function showPropertyDetails(propertyId, propertyType) {
             document.getElementById('home-page').style.display = 'none';
             document.getElementById('properties-listing').style.display = 'none';
             document.getElementById('rent-listing').style.display = 'none';
             document.getElementById('property-detail').style.display = 'block';
             document.getElementById('contact-page').style.display = 'none';
+            document.getElementById('favorites-page').style.display = 'none';
             document.getElementById('search-results').style.display = 'none';
             document.getElementById('sale-search-results').style.display = 'none';
             document.getElementById('rent-search-results').style.display = 'none';
             
-            // Get property data
-            const property = propertiesData[propertyId];
+            currentPropertyId = propertyId;
+            
+            // Fetch property from Supabase
+            const { data: property, error } = await supabase
+                .from('properties')
+                .select('*')
+                .eq('id', propertyId)
+                .single();
+                
+            if (error) {
+                console.error('Error fetching property:', error);
+                return;
+            }
             
             // Update property details
             document.getElementById('detail-title').textContent = property.title;
-            document.getElementById('detail-price').textContent = property.price;
-            document.getElementById('detail-address').textContent = property.address;
-            document.getElementById('detail-description').textContent = property.description;
+            document.getElementById('detail-price').textContent = `${property.price.toLocaleString()} ريال ${property.type === 'rent' ? '/ شهرياً' : ''}`;
+            document.getElementById('detail-address').textContent = `${property.district}، ${property.city}، المملكة العربية السعودية`;
+            document.getElementById('detail-description').textContent = property.description || 'لا يوجد وصف متاح';
             
             // Update owner information
-            document.getElementById('owner-name').textContent = property.owner.name;
-            document.getElementById('owner-phone').textContent = property.owner.phone;
-            document.getElementById('owner-email').textContent = property.owner.email;
-            document.getElementById('owner-avatar-img').src = property.owner.avatar;
+            document.getElementById('owner-name').textContent = property.owner_name || 'غير محدد';
+            document.getElementById('owner-phone').textContent = property.owner_phone || 'غير متوفر';
+            document.getElementById('owner-email').textContent = property.owner_email || 'غير متوفر';
+            document.getElementById('owner-avatar-img').src = property.owner_avatar || 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80';
             
             // Reset phone number visibility
             phoneNumberVisible = false;
@@ -2486,6 +2552,101 @@
                 badgeElement.className = 'image-badge badge-rent-detail';
                 document.getElementById('detail-price').className = 'property-price price-rent-detail';
             }
+            
+            // Update property features
+            const featuresContainer = document.querySelector('.property-features');
+            featuresContainer.innerHTML = `
+                <div class="feature">
+                    <i class="fas fa-ruler-combined"></i>
+                    <div>
+                        <span class="feature-value">${property.area} م²</span>
+                        <span class="feature-label">المساحة</span>
+                    </div>
+                </div>
+                ${property.bedrooms ? `
+                <div class="feature">
+                    <i class="fas fa-bed"></i>
+                    <div>
+                        <span class="feature-value">${property.bedrooms}</span>
+                        <span class="feature-label">غرف نوم</span>
+                    </div>
+                </div>
+                ` : ''}
+                ${property.bathrooms ? `
+                <div class="feature">
+                    <i class="fas fa-bath"></i>
+                    <div>
+                        <span class="feature-value">${property.bathrooms}</span>
+                        <span class="feature-label">حمامات</span>
+                    </div>
+                </div>
+                ` : ''}
+                ${property.parking ? `
+                <div class="feature">
+                    <i class="fas fa-car"></i>
+                    <div>
+                        <span class="feature-value">${property.parking}</span>
+                        <span class="feature-label">مواقف سيارات</span>
+                    </div>
+                </div>
+                ` : ''}
+                ${property.floors ? `
+                <div class="feature">
+                    <i class="fas fa-building"></i>
+                    <div>
+                        <span class="feature-value">${property.floors}</span>
+                        <span class="feature-label">عدد الأدوار</span>
+                    </div>
+                </div>
+                ` : ''}
+                ${property.year_built ? `
+                <div class="feature">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div>
+                        <span class="feature-value">${property.year_built}</span>
+                        <span class="feature-label">سنة البناء</span>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+            
+            // Update amenities
+            const amenitiesContainer = document.querySelector('.amenities');
+            amenitiesContainer.innerHTML = '';
+            
+            if (property.features && property.features.length > 0) {
+                property.features.forEach(feature => {
+                    const amenity = document.createElement('div');
+                    amenity.className = 'amenity';
+                    amenity.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        <span>${feature}</span>
+                    `;
+                    amenitiesContainer.appendChild(amenity);
+                });
+            } else {
+                amenitiesContainer.innerHTML = '<p>لا توجد مرافق متوفرة</p>';
+            }
+            
+            // Update gallery images
+            const mainImage = document.getElementById('main-image');
+            const thumbnails = document.querySelectorAll('.thumbnail img');
+            
+            if (property.image_urls && property.image_urls.length > 0) {
+                mainImage.src = property.image_urls[0];
+                
+                // Update thumbnails
+                for (let i = 0; i < Math.min(3, property.image_urls.length); i++) {
+                    if (thumbnails[i]) {
+                        thumbnails[i].src = property.image_urls[i];
+                        thumbnails[i].parentElement.setAttribute('onclick', `changeImage('${property.image_urls[i]}')`);
+                    }
+                }
+            }
+            
+            // Check if property is in user's favorites
+            const isFavorite = await checkIfFavorite(propertyId);
+            updateFavoriteButton(propertyId, isFavorite);
             
             // Update breadcrumb
             if (propertyType === 'sale') {
@@ -2510,8 +2671,10 @@
         function goBackToListing() {
             if (currentListingType === 'sale') {
                 showPropertiesListing();
-            } else {
+            } else if (currentListingType === 'rent') {
                 showRentListing();
+            } else {
+                showHomePage();
             }
         }
         
@@ -2582,9 +2745,8 @@
         
         // Close modal if clicked outside
         window.onclick = function(event) {
-            var modal = document.getElementById('contact-modal');
-            if (event.target == modal) {
-                closeContactModal();
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
             }
         }
         
@@ -2611,6 +2773,9 @@
         window.onload = function() {
             // Show home page by default
             showHomePage();
+            
+            // Check if user is logged in
+            checkUserSession();
         }
     </script>
 </body>
