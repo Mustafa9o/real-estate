@@ -1942,7 +1942,7 @@
                 currentUser = data.user;
                 document.getElementById('auth-buttons').style.display = 'none';
                 document.getElementById('user-info').style.display = 'flex';
-                document.getElementById('user-name').textContent = `مرحباً، ${currentUser.full_name}`;
+                document.getElementById('user-name').textContent = `مرحباً، ${currentUser.name}`;
                 
                 // Ensure user has a profile
                 await ensureUserProfile(currentUser);
@@ -2892,7 +2892,7 @@
                     currentUser = session.user;
                     document.getElementById('auth-buttons').style.display = 'none';
                     document.getElementById('user-info').style.display = 'flex';
-                    document.getElementById('user-name').textContent = `مرحباً، ${currentUser.full_name}`;
+                    document.getElementById('user-name').textContent = `مرحباً، ${currentUser.name}`;
                     
                     // Ensure user has a profile
                     ensureUserProfile(currentUser);
