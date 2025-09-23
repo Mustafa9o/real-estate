@@ -3,7 +3,23 @@ const supabaseUrl = 'https://oanuujxhmxngstijciie.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hbnV1anhobXhuZ3N0aWpjaWllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDc2NjAsImV4cCI6MjA3NDAyMzY2MH0.kiv8JpUxtTdDwDJTsMoDTb2vYNWbQMH19lzfYv7Xdzs';
 
 // Create a single Supabase client instance
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+let supabase;
+
+// Initialize Supabase when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Supabase client
+    if (window.supabase) {
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Check if user is already logged in
+        checkUserSession();
+        
+        // Load home page properties
+        loadHomePageProperties();
+    } else {
+        console.error('Supabase library not loaded');
+    }
+});
 
 // Track current listing type
 let currentListingType = 'sale';
@@ -23,6 +39,11 @@ function closeModal(modalId) {
 
 // Function to get user profile from database
 async function getUserProfile(userId) {
+    if (!supabase) {
+        console.error('Supabase client not initialized');
+        return null;
+    }
+    
     try {
         const { data, error } = await supabase
             .from('profiles')
@@ -76,25 +97,39 @@ async function updateUserUI(user) {
 
 // Check if user is already logged in
 async function checkUserSession() {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    if (!supabase) {
+        console.error('Supabase client not initialized');
+        return;
+    }
     
-    if (session) {
-        // User is logged in
-        currentUser = session.user;
+    try {
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        // Get user profile
-        userProfile = await getUserProfile(currentUser.id);
-        
-        // Update UI
-        await updateUserUI(currentUser);
-        
-        // Ensure user has a profile
-        await ensureUserProfile(currentUser);
+        if (session) {
+            // User is logged in
+            currentUser = session.user;
+            
+            // Get user profile
+            userProfile = await getUserProfile(currentUser.id);
+            
+            // Update UI
+            await updateUserUI(currentUser);
+            
+            // Ensure user has a profile
+            await ensureUserProfile(currentUser);
+        }
+    } catch (err) {
+        console.error('Error checking user session:', err);
     }
 }
 
 // Function to ensure user has a profile
 async function ensureUserProfile(user) {
+    if (!supabase) {
+        console.error('Supabase client not initialized');
+        return;
+    }
+    
     try {
         // Check if profile exists
         const { data: profile, error: profileError } = await supabase
@@ -133,6 +168,11 @@ async function ensureUserProfile(user) {
 
 // Function to resend confirmation email
 async function resendConfirmationEmail(email) {
+    if (!supabase) {
+        console.error('Supabase client not initialized');
+        return false;
+    }
+    
     try {
         const { error } = await supabase.auth.resend({
             type: 'signup',
@@ -154,6 +194,11 @@ async function resendConfirmationEmail(email) {
 // Registration function
 document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
     
     const name = document.getElementById('register-name').value;
     const email = document.getElementById('register-email').value;
@@ -211,6 +256,11 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
 // Login function
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
     
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
@@ -270,6 +320,11 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
 // Logout function
 async function logout() {
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     try {
         const { error } = await supabase.auth.signOut();
         
@@ -295,6 +350,11 @@ async function addToFavorites(propertyId) {
     if (!currentUser) {
         alert('يرجى تسجيل الدخول لحفظ العقارات المفضلة');
         showModal('login-modal');
+        return;
+    }
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
         return;
     }
     
@@ -334,6 +394,11 @@ async function removeFromFavorites(propertyId) {
         return;
     }
     
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     try {
         const { error } = await supabase
             .from('favorites')
@@ -355,7 +420,7 @@ async function removeFromFavorites(propertyId) {
 
 // Function to check if property is in user's favorites
 async function checkIfFavorite(propertyId) {
-    if (!currentUser) {
+    if (!currentUser || !supabase) {
         return false;
     }
     
@@ -434,6 +499,11 @@ async function showFavorites() {
         <li><a onclick="showHomePage()">الرئيسية</a></li>
         <li>عقاراتي المفضلة</li>
     `;
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
     
     try {
         // Get user's favorites with property details
@@ -546,21 +616,31 @@ async function showFavorites() {
 async function fetchProperties(type = null) {
     console.log('Fetching properties with type:', type);
     
-    let query = supabase.from('properties').select('*');
-    
-    if (type) {
-        query = query.eq('type', type);
-    }
-    
-    const { data, error } = await query;
-    
-    if (error) {
-        console.error('Error fetching properties:', error);
+    if (!supabase) {
+        console.error('Supabase client not initialized');
         return [];
     }
     
-    console.log('Fetched properties:', data);
-    return data || [];
+    try {
+        let query = supabase.from('properties').select('*');
+        
+        if (type) {
+            query = query.eq('type', type);
+        }
+        
+        const { data, error } = await query;
+        
+        if (error) {
+            console.error('Error fetching properties:', error);
+            return [];
+        }
+        
+        console.log('Fetched properties:', data);
+        return data || [];
+    } catch (err) {
+        console.error('Error in fetchProperties:', err);
+        return [];
+    }
 }
 
 // Function to create property card HTML
@@ -956,6 +1036,11 @@ async function showPropertyDetails(propertyId, propertyType) {
     
     currentPropertyId = propertyId;
     
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     // Fetch property from Supabase
     const { data: property, error } = await supabase
         .from('properties')
@@ -1303,6 +1388,11 @@ async function loadOwnerProperties() {
     const tbody = document.getElementById('properties-tbody');
     tbody.innerHTML = '';
     
+    if (!supabase) {
+        console.error('Supabase client not initialized');
+        return;
+    }
+    
     try {
         const { data, error } = await supabase
             .from('properties')
@@ -1366,6 +1456,11 @@ function showAddPropertyForm() {
 document.getElementById('add-property-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     const propertyData = {
         title: document.getElementById('property-title').value,
         price: parseFloat(document.getElementById('property-price').value),
@@ -1406,6 +1501,11 @@ document.getElementById('add-property-form').addEventListener('submit', async (e
 
 // Function to edit a property
 async function editProperty(propertyId) {
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     try {
         // Fetch property data
         const { data: property, error } = await supabase
@@ -1444,6 +1544,11 @@ async function editProperty(propertyId) {
 // Edit property form submission
 document.getElementById('edit-property-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
     
     const propertyId = document.getElementById('edit-property-id').value;
     
@@ -1484,6 +1589,11 @@ document.getElementById('edit-property-form').addEventListener('submit', async (
 
 // Function to toggle property status
 async function togglePropertyStatus(propertyId, currentStatus) {
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     const newStatus = currentStatus === 'available' ? 'sold' : 'available';
     
     try {
@@ -1513,6 +1623,11 @@ async function deleteProperty(propertyId) {
         return;
     }
     
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     try {
         const { error } = await supabase
             .from('properties')
@@ -1538,6 +1653,11 @@ async function deleteProperty(propertyId) {
 async function loadOwnerAgents() {
     const tbody = document.getElementById('agents-tbody');
     tbody.innerHTML = '';
+    
+    if (!supabase) {
+        console.error('Supabase client not initialized');
+        return;
+    }
     
     try {
         const { data, error } = await supabase
@@ -1587,6 +1707,11 @@ async function loadOwnerAgents() {
 
 // Function to edit an agent
 async function editAgent(agentId) {
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     try {
         // Fetch agent data
         const { data: agent, error } = await supabase
@@ -1618,6 +1743,11 @@ async function editAgent(agentId) {
 // Edit agent form submission
 document.getElementById('edit-agent-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
     
     const agentId = document.getElementById('edit-agent-id').value;
     
@@ -1655,6 +1785,11 @@ async function deleteAgent(agentId) {
         return;
     }
     
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     try {
         const { error } = await supabase
             .from('agents')
@@ -1680,6 +1815,11 @@ async function deleteAgent(agentId) {
 async function loadOwnerReports() {
     const reportsContainer = document.getElementById('reports-container');
     reportsContainer.innerHTML = '<div class="loading">جاري تحميل التقارير...</div>';
+    
+    if (!supabase) {
+        reportsContainer.innerHTML = '<div class="error">الخدمة غير متوفرة حالياً</div>';
+        return;
+    }
     
     try {
         // Get properties count
@@ -1790,6 +1930,11 @@ async function loadConversations() {
     const conversationsContainer = document.getElementById('conversations-container');
     conversationsContainer.innerHTML = '<div class="loading">جاري تحميل المحادثات...</div>';
     
+    if (!supabase) {
+        conversationsContainer.innerHTML = '<div class="error">الخدمة غير متوفرة حالياً</div>';
+        return;
+    }
+    
     try {
         const { data, error } = await supabase
             .from('conversations')
@@ -1868,6 +2013,11 @@ async function deleteConversation(conversationId) {
         return;
     }
     
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     try {
         const { error } = await supabase
             .from('conversations')
@@ -1897,6 +2047,11 @@ function showAddAgentForm() {
 // Add agent form submission
 document.getElementById('add-agent-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
     
     const agentData = {
         name: document.getElementById('agent-name').value,
@@ -1931,6 +2086,11 @@ document.getElementById('add-agent-form').addEventListener('submit', async (e) =
 
 // Function to insert sample data
 async function insertSampleData() {
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
     // Sample properties
     const sampleProperties = [
         {
@@ -2076,12 +2236,3 @@ async function insertSampleData() {
         alert('حدث خطأ أثناء إضافة البيانات التجريبية: ' + err.message);
     }
 }
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-    // Check if user is already logged in
-    checkUserSession();
-    
-    // Load home page properties
-    loadHomePageProperties();
-});
