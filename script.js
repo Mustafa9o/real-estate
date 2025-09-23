@@ -544,6 +544,8 @@ async function showFavorites() {
 
 // Function to fetch properties from Supabase
 async function fetchProperties(type = null) {
+    console.log('Fetching properties with type:', type);
+    
     let query = supabase.from('properties').select('*');
     
     if (type) {
@@ -557,6 +559,7 @@ async function fetchProperties(type = null) {
         return [];
     }
     
+    console.log('Fetched properties:', data);
     return data || [];
 }
 
@@ -646,6 +649,20 @@ async function loadHomePageProperties() {
     const properties = await fetchProperties();
     
     // Display properties
+    if (properties.length === 0) {
+        propertiesGrid.innerHTML = `
+            <div class="no-properties" style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                <i class="fas fa-home" style="font-size: 48px; color: #3498db; margin-bottom: 20px;"></i>
+                <h3>لا توجد عقارات متاحة</h3>
+                <p>لم يتم العثور على أي عقارات. يرجى إضافة بيانات تجريبية.</p>
+                <button class="btn btn-primary" onclick="insertSampleData()" style="margin-top: 15px;">
+                    إضافة بيانات تجريبية
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
     properties.forEach(property => {
         const propertyCard = createPropertyCard(property);
         propertiesGrid.appendChild(propertyCard);
@@ -1911,6 +1928,154 @@ document.getElementById('add-agent-form').addEventListener('submit', async (e) =
         alert('حدث خطأ: ' + err.message);
     }
 });
+
+// Function to insert sample data
+async function insertSampleData() {
+    // Sample properties
+    const sampleProperties = [
+        {
+            title: 'فيلا فاخرة في حي النخيل',
+            price: 2500000,
+            city: 'الرياض',
+            district: 'حي النخيل',
+            area: 400,
+            bedrooms: 5,
+            bathrooms: 4,
+            description: 'فيلا فاخرة جداً في حي النخيل، تتكون من طابقين مع حديقة ومرآب',
+            type: 'sale',
+            status: 'available',
+            owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
+            image_urls: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
+            property_type: 'فيلا',
+            owner_name: 'أحمد محمد',
+            owner_phone: '0501234567',
+            owner_email: 'ahmed@example.com',
+            owner_avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
+            features: ['مسبح', 'حديقة', 'مرآب', 'غرفة خادمة'],
+            parking: 2,
+            floors: 2,
+            year_built: 2020
+        },
+        {
+            title: 'شقة عصرية في شارع التحلية',
+            price: 800000,
+            city: 'جدة',
+            district: 'التحلية',
+            area: 150,
+            bedrooms: 3,
+            bathrooms: 2,
+            description: 'شقة عصرية في موقع مميز، قريبة من جميع الخدمات',
+            type: 'sale',
+            status: 'available',
+            owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
+            image_urls: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
+            property_type: 'شقة',
+            owner_name: 'محمد علي',
+            owner_phone: '0559876543',
+            owner_email: 'mohammed@example.com',
+            owner_avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
+            features: ['تكييف مركزي', 'مصعد', 'أمن', 'كاميرات مراقبة'],
+            parking: 1,
+            floors: 1,
+            year_built: 2019
+        },
+        {
+            title: 'شقة للإيجار في حي الملز',
+            price: 35000,
+            city: 'الرياض',
+            district: 'الملز',
+            area: 120,
+            bedrooms: 2,
+            bathrooms: 1,
+            description: 'شقة للإيجار في حي الملز، مناسبة للعائلات',
+            type: 'rent',
+            status: 'available',
+            owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
+            image_urls: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
+            property_type: 'شقة',
+            owner_name: 'فاطمة أحمد',
+            owner_phone: '0511223344',
+            owner_email: 'fatima@example.com',
+            owner_avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
+            features: ['أمن', 'موقف سيارة', 'مطبخ مجهز'],
+            parking: 1,
+            floors: 1,
+            year_built: 2018
+        }
+    ];
+
+    // Sample agents
+    const sampleAgents = [
+        {
+            name: 'سعد عبدالله',
+            phone: '0501112233',
+            email: 'saad@example.com',
+            owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000'
+        },
+        {
+            name: 'نورة محمد',
+            phone: '0554445566',
+            email: 'nora@example.com',
+            owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000'
+        }
+    ];
+
+    // Sample conversations
+    const sampleConversations = [
+        {
+            owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
+            user_id: '11111111-1111-1111-1111-111111111111',
+            message: 'أهلاً، أود الاستفسار عن الفيلة المعروضة في حي النخيل',
+            created_at: new Date().toISOString()
+        },
+        {
+            owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
+            user_id: '22222222-2222-2222-2222-222222222222',
+            message: 'هل الشقة في شارع التحلية لا تزال متاحة؟',
+            created_at: new Date().toISOString()
+        }
+    ];
+
+    try {
+        // Insert properties
+        const { data: propertiesData, error: propertiesError } = await supabase
+            .from('properties')
+            .insert(sampleProperties);
+            
+        if (propertiesError) {
+            console.error('Error inserting sample properties:', propertiesError);
+        } else {
+            console.log('Sample properties inserted:', propertiesData);
+        }
+
+        // Insert agents
+        const { data: agentsData, error: agentsError } = await supabase
+            .from('agents')
+            .insert(sampleAgents);
+            
+        if (agentsError) {
+            console.error('Error inserting sample agents:', agentsError);
+        } else {
+            console.log('Sample agents inserted:', agentsData);
+        }
+
+        // Insert conversations
+        const { data: conversationsData, error: conversationsError } = await supabase
+            .from('conversations')
+            .insert(sampleConversations);
+            
+        if (conversationsError) {
+            console.error('Error inserting sample conversations:', conversationsError);
+        } else {
+            console.log('Sample conversations inserted:', conversationsData);
+        }
+
+        alert('تم إضافة البيانات التجريبية بنجاح! يرجى تحديث الصفحة.');
+    } catch (err) {
+        console.error('Error inserting sample data:', err);
+        alert('حدث خطأ أثناء إضافة البيانات التجريبية: ' + err.message);
+    }
+}
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
