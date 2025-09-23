@@ -1,10 +1,7 @@
 const supabaseUrl = 'https://oanuujxhmxngstijciie.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hbnV1anhobXhuZ3N0aWpjaWllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDc2NjAsImV4cCI6MjA3NDAyMzY2MH0.kiv8JpUxtTdDwDJTsMoDTb2vYNWbQMH19lzfYv7Xdzs';
 
-// Create a single Supabase client instance
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-let supabase;
 
 // Initialize Supabase when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
