@@ -24,6 +24,7 @@
                     <li><a href="#" onclick="showFavorites(); return false;">عقاراتي المفضلة</a></li>
                     <li><a href="#">وكلاء عقاريون</a></li>
                     <li><a href="#" onclick="showContactPage(); return false;">اتصل بنا</a></li>
+                    <li id="dashboard-link" style="display: none;"><a href="#" onclick="showOwnerDashboard(); return false;">لوحة التحكم</a></li>
                 </ul>
             </nav>
             <div class="auth-buttons" id="auth-buttons">
@@ -478,6 +479,305 @@
             <div class="map-section">
                 <h2 class="section-title">موقعنا على الخريطة</h2>
                 <div id="contact-map"></div>
+            </div>
+        </div>
+        
+        <!-- Owner Dashboard -->
+        <div id="owner-dashboard" class="owner-dashboard">
+            <div class="container">
+                <h1 class="page-title">لوحة التحكم</h1>
+                
+                <div class="dashboard-container">
+                    <!-- Sidebar -->
+                    <div class="sidebar">
+                        <ul>
+                            <li class="active"><a href="#" onclick="showDashboardSection('properties')">إدارة العقارات</a></li>
+                            <li><a href="#" onclick="showDashboardSection('agents')">إدارة الوكلاء</a></li>
+                            <li><a href="#" onclick="showDashboardSection('messages')">الرسائل</a></li>
+                            <li><a href="#" onclick="showDashboardSection('reports')">التقارير</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Main Content -->
+                    <div class="dashboard-content">
+                        <!-- Properties Section -->
+                        <div id="dashboard-properties" class="dashboard-section">
+                            <div class="section-header">
+                                <h2>إدارة العقارات</h2>
+                                <button class="btn btn-primary" onclick="showAddPropertyForm()">إضافة عقار جديد</button>
+                            </div>
+                            
+                            <!-- Properties Table -->
+                            <div class="table-container">
+                                <table class="properties-table">
+                                    <thead>
+                                        <tr>
+                                            <th>العنوان</th>
+                                            <th>السعر</th>
+                                            <th>المدينة</th>
+                                            <th>الحالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="properties-tbody">
+                                        <!-- Properties will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Agents Section -->
+                        <div id="dashboard-agents" class="dashboard-section" style="display: none;">
+                            <div class="section-header">
+                                <h2>إدارة الوكلاء</h2>
+                                <button class="btn btn-primary" onclick="showAddAgentForm()">إضافة وكيل جديد</button>
+                            </div>
+                            
+                            <!-- Agents Table -->
+                            <div class="table-container">
+                                <table class="agents-table">
+                                    <thead>
+                                        <tr>
+                                            <th>الاسم</th>
+                                            <th>البريد الإلكتروني</th>
+                                            <th>تاريخ الانضمام</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="agents-tbody">
+                                        <!-- Agents will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Messages Section -->
+                        <div id="dashboard-messages" class="dashboard-section" style="display: none;">
+                            <div class="section-header">
+                                <h2>الرسائل</h2>
+                            </div>
+                            
+                            <div class="messages-container">
+                                <div class="conversations-list">
+                                    <h3>المحادثات</h3>
+                                    <ul id="conversations-list">
+                                        <!-- Conversations will be loaded here -->
+                                    </ul>
+                                </div>
+                                
+                                <div class="chat-container">
+                                    <div class="chat-header">
+                                        <h3 id="chat-header-name">اختر محادثة</h3>
+                                    </div>
+                                    <div class="chat-messages" id="chat-messages">
+                                        <!-- Messages will be loaded here -->
+                                    </div>
+                                    <div class="chat-input">
+                                        <input type="text" id="message-input" placeholder="اكتب رسالتك...">
+                                        <button onclick="sendMessage()">إرسال</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reports Section -->
+                        <div id="dashboard-reports" class="dashboard-section" style="display: none;">
+                            <div class="section-header">
+                                <h2>التقارير</h2>
+                            </div>
+                            
+                            <div class="reports-container">
+                                <div class="report-card">
+                                    <h3>إجمالي العقارات</h3>
+                                    <p class="report-value" id="total-properties">0</p>
+                                </div>
+                                
+                                <div class="report-card">
+                                    <h3>العقارات المتاحة</h3>
+                                    <p class="report-value" id="available-properties">0</p>
+                                </div>
+                                
+                                <div class="report-card">
+                                    <h3>العقارات المباعة</h3>
+                                    <p class="report-value" id="sold-properties">0</p>
+                                </div>
+                                
+                                <div class="report-card">
+                                    <h3>عدد الوكلاء</h3>
+                                    <p class="report-value" id="total-agents">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Property Modal -->
+            <div id="add-property-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>إضافة عقار جديد</h2>
+                        <span class="close-modal" onclick="closeModal('add-property-modal')">&times;</span>
+                    </div>
+                    <form id="add-property-form">
+                        <div class="form-group">
+                            <label>عنوان العقار</label>
+                            <input type="text" id="property-title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>السعر</label>
+                            <input type="number" id="property-price" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>المدينة</label>
+                            <input type="text" id="property-city" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>الحي</label>
+                            <input type="text" id="property-district" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>المساحة (م²)</label>
+                            <input type="number" id="property-area" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>عدد غرف النوم</label>
+                            <input type="number" id="property-bedrooms">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>عدد الحمامات</label>
+                            <input type="number" id="property-bathrooms">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>الوصف</label>
+                            <textarea id="property-description"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>نوع العقار</label>
+                            <select id="property-type">
+                                <option value="sale">للبيع</option>
+                                <option value="rent">للإيجار</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>الحالة</label>
+                            <select id="property-status">
+                                <option value="available">متاح</option>
+                                <option value="sold">مباع</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">إضافة العقار</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Edit Property Modal -->
+            <div id="edit-property-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>تعديل العقار</h2>
+                        <span class="close-modal" onclick="closeModal('edit-property-modal')">&times;</span>
+                    </div>
+                    <form id="edit-property-form">
+                        <input type="hidden" id="edit-property-id">
+                        
+                        <div class="form-group">
+                            <label>عنوان العقار</label>
+                            <input type="text" id="edit-property-title" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>السعر</label>
+                            <input type="number" id="edit-property-price" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>المدينة</label>
+                            <input type="text" id="edit-property-city" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>الحي</label>
+                            <input type="text" id="edit-property-district" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>المساحة (م²)</label>
+                            <input type="number" id="edit-property-area" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>عدد غرف النوم</label>
+                            <input type="number" id="edit-property-bedrooms">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>عدد الحمامات</label>
+                            <input type="number" id="edit-property-bathrooms">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>الوصف</label>
+                            <textarea id="edit-property-description"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>نوع العقار</label>
+                            <select id="edit-property-type">
+                                <option value="sale">للبيع</option>
+                                <option value="rent">للإيجار</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>الحالة</label>
+                            <select id="edit-property-status">
+                                <option value="available">متاح</option>
+                                <option value="sold">مباع</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">تحديث العقار</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Add Agent Modal -->
+            <div id="add-agent-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>إضافة وكيل جديد</h2>
+                        <span class="close-modal" onclick="closeModal('add-agent-modal')">&times;</span>
+                    </div>
+                    <form id="add-agent-form">
+                        <div class="form-group">
+                            <label>الاسم الكامل</label>
+                            <input type="text" id="agent-name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" id="agent-email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="tel" id="agent-phone">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">إضافة الوكيل</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
