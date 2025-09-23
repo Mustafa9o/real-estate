@@ -34,6 +34,7 @@
             <div class="user-info" id="user-info" style="display: none;">
                 <span id="user-name">مرحباً</span>
                 <button onclick="logout()">تسجيل الخروج</button>
+                <button onclick="setUserAsOwner()" style="background: var(--warning-color); margin-right: 5px;">تعيين كمالك</button>
             </div>
         </div>
     </header>
@@ -483,7 +484,7 @@
         </div>
         
         <!-- Owner Dashboard -->
-        <div id="owner-dashboard" class="owner-dashboard">
+        <div id="owner-dashboard" class="owner-dashboard" style="display: none;">
             <div class="container">
                 <h1 class="page-title">لوحة التحكم</h1>
                 
