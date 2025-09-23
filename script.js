@@ -81,6 +81,11 @@ async function checkUserSession() {
     if (session) {
         // User is logged in
         currentUser = session.user;
+        
+        // Get user profile
+        userProfile = await getUserProfile(currentUser.id);
+        
+        // Update UI
         await updateUserUI(currentUser);
         
         // Ensure user has a profile
@@ -108,7 +113,8 @@ async function ensureUserProfile(user) {
                     { 
                         id: user.id, 
                         full_name: fullName, 
-                        email: user.email 
+                        email: user.email,
+                        role: 'user' // Default role is 'user'
                     }
                 ]);
             
@@ -184,7 +190,8 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
                     { 
                         id: data.user.id, 
                         full_name: name, 
-                        email: email 
+                        email: email,
+                        role: 'user' // Default role is 'user'
                     }
                 ]);
                 
@@ -417,6 +424,7 @@ async function showFavorites() {
     document.getElementById('rent-listing').style.display = 'none';
     document.getElementById('property-detail').style.display = 'none';
     document.getElementById('contact-page').style.display = 'none';
+    document.getElementById('owner-dashboard').style.display = 'none';
     
     // Show favorites page
     document.getElementById('favorites-page').style.display = 'block';
@@ -615,7 +623,7 @@ function showHomePage() {
     document.getElementById('property-detail').style.display = 'none';
     document.getElementById('contact-page').style.display = 'none';
     document.getElementById('favorites-page').style.display = 'none';
-    document.getElementById('owner-dashboard').style.display = 'none';
+    document.getElementById('owner-dashboard').style.display = 'none'; // Hide dashboard
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
@@ -1194,16 +1202,22 @@ document.getElementById('rent-search-input').addEventListener('keypress', functi
 
 // Show owner dashboard
 async function showOwnerDashboard() {
-    // Check if user is logged in and is an owner
+    // Check if user is logged in
     if (!currentUser) {
         alert('يرجى تسجيل الدخول أولاً');
         showModal('login-modal');
         return;
     }
     
+    // Check if user profile is loaded
+    if (!userProfile) {
+        userProfile = await getUserProfile(currentUser.id);
+    }
+    
     // Check if user is an owner
-    if (userProfile && userProfile.role !== 'owner') {
+    if (!userProfile || userProfile.role !== 'owner') {
         alert('لا تملك صلاحية الوصول إلى لوحة التحكم');
+        showHomePage();
         return;
     }
     
@@ -1360,20 +1374,24 @@ document.getElementById('add-property-form').addEventListener('submit', async (e
             return;
         }
         
-        alert('تم إضافة العقار بنجاح');
+        // Success - close modal and reload properties
         closeModal('add-property-modal');
-        document.getElementById('add-property-form').reset();
         loadOwnerProperties();
+        alert('تم إضافة العقار بنجاح');
+        
+        // Reset form
+        document.getElementById('add-property-form').reset();
     } catch (err) {
         console.error('Error:', err);
         alert('حدث خطأ: ' + err.message);
     }
 });
 
-// Edit property
+// Function to edit a property
 async function editProperty(propertyId) {
     try {
-        const { data, error } = await supabase
+        // Fetch property data
+        const { data: property, error } = await supabase
             .from('properties')
             .select('*')
             .eq('id', propertyId)
@@ -1381,25 +1399,28 @@ async function editProperty(propertyId) {
             
         if (error) {
             console.error('Error fetching property:', error);
+            alert('خطأ في جلب بيانات العقار');
             return;
         }
         
         // Populate form with property data
-        document.getElementById('edit-property-id').value = data.id;
-        document.getElementById('edit-property-title').value = data.title;
-        document.getElementById('edit-property-price').value = data.price;
-        document.getElementById('edit-property-city').value = data.city;
-        document.getElementById('edit-property-district').value = data.district;
-        document.getElementById('edit-property-area').value = data.area;
-        document.getElementById('edit-property-bedrooms').value = data.bedrooms || '';
-        document.getElementById('edit-property-bathrooms').value = data.bathrooms || '';
-        document.getElementById('edit-property-description').value = data.description || '';
-        document.getElementById('edit-property-type').value = data.type;
-        document.getElementById('edit-property-status').value = data.status;
+        document.getElementById('edit-property-id').value = property.id;
+        document.getElementById('edit-property-title').value = property.title;
+        document.getElementById('edit-property-price').value = property.price;
+        document.getElementById('edit-property-city').value = property.city;
+        document.getElementById('edit-property-district').value = property.district;
+        document.getElementById('edit-property-area').value = property.area;
+        document.getElementById('edit-property-bedrooms').value = property.bedrooms || '';
+        document.getElementById('edit-property-bathrooms').value = property.bathrooms || '';
+        document.getElementById('edit-property-description').value = property.description || '';
+        document.getElementById('edit-property-type').value = property.type;
+        document.getElementById('edit-property-status').value = property.status;
         
+        // Show edit modal
         showModal('edit-property-modal');
     } catch (err) {
         console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
     }
 }
 
@@ -1423,7 +1444,7 @@ document.getElementById('edit-property-form').addEventListener('submit', async (
     };
     
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('properties')
             .update(propertyData)
             .eq('id', propertyId);
@@ -1434,21 +1455,22 @@ document.getElementById('edit-property-form').addEventListener('submit', async (
             return;
         }
         
-        alert('تم تحديث العقار بنجاح');
+        // Success - close modal and reload properties
         closeModal('edit-property-modal');
         loadOwnerProperties();
+        alert('تم تحديث العقار بنجاح');
     } catch (err) {
         console.error('Error:', err);
         alert('حدث خطأ: ' + err.message);
     }
 });
 
-// Toggle property status
+// Function to toggle property status
 async function togglePropertyStatus(propertyId, currentStatus) {
     const newStatus = currentStatus === 'available' ? 'sold' : 'available';
     
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('properties')
             .update({ status: newStatus })
             .eq('id', propertyId);
@@ -1459,22 +1481,23 @@ async function togglePropertyStatus(propertyId, currentStatus) {
             return;
         }
         
-        alert(`تم تحديث حالة العقار إلى ${newStatus === 'available' ? 'متاح' : 'مباع'} بنجاح`);
+        // Reload properties
         loadOwnerProperties();
+        alert(`تم تحديث حالة العقار إلى ${newStatus === 'available' ? 'متاح' : 'مباع'} بنجاح`);
     } catch (err) {
         console.error('Error:', err);
         alert('حدث خطأ: ' + err.message);
     }
 }
 
-// Delete property
+// Function to delete a property
 async function deleteProperty(propertyId) {
-    if (!confirm('هل أنت متأكد من حذف هذا العقار؟')) {
+    if (!confirm('هل أنت متأكد من حذف هذا العقار؟ لا يمكن التراجع عن هذا الإجراء.')) {
         return;
     }
     
     try {
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('properties')
             .delete()
             .eq('id', propertyId);
@@ -1485,25 +1508,25 @@ async function deleteProperty(propertyId) {
             return;
         }
         
-        alert('تم حذف العقار بنجاح');
+        // Reload properties
         loadOwnerProperties();
+        alert('تم حذف العقار بنجاح');
     } catch (err) {
         console.error('Error:', err);
         alert('حدث خطأ: ' + err.message);
     }
 }
 
-// Load owner agents
+// Function to load owner agents
 async function loadOwnerAgents() {
     const tbody = document.getElementById('agents-tbody');
     tbody.innerHTML = '';
     
     try {
         const { data, error } = await supabase
-            .from('profiles')
+            .from('agents')
             .select('*')
-            .eq('owner_id', currentUser.id)
-            .eq('role', 'agent');
+            .eq('owner_id', currentUser.id);
             
         if (error) {
             console.error('Error loading agents:', error);
@@ -1524,11 +1547,14 @@ async function loadOwnerAgents() {
         data.forEach(agent => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${agent.full_name}</td>
+                <td>${agent.name}</td>
+                <td>${agent.phone}</td>
                 <td>${agent.email}</td>
-                <td>${new Date(agent.created_at).toLocaleDateString('ar-SA')}</td>
                 <td>
                     <div class="action-buttons">
+                        <button class="btn btn-primary btn-small" onclick="editAgent('${agent.id}')">
+                            تعديل
+                        </button>
                         <button class="btn btn-outline btn-small" onclick="deleteAgent('${agent.id}')">
                             حذف
                         </button>
@@ -1542,7 +1568,311 @@ async function loadOwnerAgents() {
     }
 }
 
-// Show add agent form
+// Function to edit an agent
+async function editAgent(agentId) {
+    try {
+        // Fetch agent data
+        const { data: agent, error } = await supabase
+            .from('agents')
+            .select('*')
+            .eq('id', agentId)
+            .single();
+            
+        if (error) {
+            console.error('Error fetching agent:', error);
+            alert('خطأ في جلب بيانات الوكيل');
+            return;
+        }
+        
+        // Populate form with agent data
+        document.getElementById('edit-agent-id').value = agent.id;
+        document.getElementById('edit-agent-name').value = agent.name;
+        document.getElementById('edit-agent-phone').value = agent.phone;
+        document.getElementById('edit-agent-email').value = agent.email;
+        
+        // Show edit modal
+        showModal('edit-agent-modal');
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+}
+
+// Edit agent form submission
+document.getElementById('edit-agent-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const agentId = document.getElementById('edit-agent-id').value;
+    
+    const agentData = {
+        name: document.getElementById('edit-agent-name').value,
+        phone: document.getElementById('edit-agent-phone').value,
+        email: document.getElementById('edit-agent-email').value
+    };
+    
+    try {
+        const { error } = await supabase
+            .from('agents')
+            .update(agentData)
+            .eq('id', agentId);
+            
+        if (error) {
+            console.error('Error updating agent:', error);
+            alert('خطأ في تحديث الوكيل: ' + error.message);
+            return;
+        }
+        
+        // Success - close modal and reload agents
+        closeModal('edit-agent-modal');
+        loadOwnerAgents();
+        alert('تم تحديث الوكيل بنجاح');
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+});
+
+// Function to delete an agent
+async function deleteAgent(agentId) {
+    if (!confirm('هل أنت متأكد من حذف هذا الوكيل؟')) {
+        return;
+    }
+    
+    try {
+        const { error } = await supabase
+            .from('agents')
+            .delete()
+            .eq('id', agentId);
+            
+        if (error) {
+            console.error('Error deleting agent:', error);
+            alert('خطأ في حذف الوكيل: ' + error.message);
+            return;
+        }
+        
+        // Reload agents
+        loadOwnerAgents();
+        alert('تم حذف الوكيل بنجاح');
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+}
+
+// Function to load owner reports
+async function loadOwnerReports() {
+    const reportsContainer = document.getElementById('reports-container');
+    reportsContainer.innerHTML = '<div class="loading">جاري تحميل التقارير...</div>';
+    
+    try {
+        // Get properties count
+        const { data: properties, error: propertiesError } = await supabase
+            .from('properties')
+            .select('*')
+            .eq('owner_id', currentUser.id);
+            
+        if (propertiesError) {
+            console.error('Error loading properties:', propertiesError);
+            reportsContainer.innerHTML = '<div class="error">خطأ في تحميل البيانات</div>';
+            return;
+        }
+        
+        // Get favorites count
+        const { data: favorites, error: favoritesError } = await supabase
+            .from('favorites')
+            .select(`
+                property_id,
+                properties (
+                    id,
+                    title
+                )
+            `)
+            .in('property_id', properties.map(p => p.id));
+            
+        if (favoritesError) {
+            console.error('Error loading favorites:', favoritesError);
+        }
+        
+        // Calculate statistics
+        const totalProperties = properties ? properties.length : 0;
+        const availableProperties = properties ? properties.filter(p => p.status === 'available').length : 0;
+        const soldProperties = properties ? properties.filter(p => p.status === 'sold').length : 0;
+        const totalFavorites = favorites ? favorites.length : 0;
+        
+        // Calculate total value
+        const totalValue = properties ? properties.reduce((sum, p) => sum + p.price, 0) : 0;
+        
+        // Create report HTML
+        reportsContainer.innerHTML = `
+            <div class="reports-grid">
+                <div class="report-card">
+                    <h3>إجمالي العقارات</h3>
+                    <div class="report-value">${totalProperties}</div>
+                </div>
+                <div class="report-card">
+                    <h3>العقارات المتاحة</h3>
+                    <div class="report-value">${availableProperties}</div>
+                </div>
+                <div class="report-card">
+                    <h3>العقارات المباعة</h3>
+                    <div class="report-value">${soldProperties}</div>
+                </div>
+                <div class="report-card">
+                    <h3>القيمة الإجمالية</h3>
+                    <div class="report-value">${totalValue.toLocaleString()} ريال</div>
+                </div>
+                <div class="report-card">
+                    <h3>الإضافات للمفضلة</h3>
+                    <div class="report-value">${totalFavorites}</div>
+                </div>
+            </div>
+            
+            <div class="report-details">
+                <h3>تفاصيل العقارات</h3>
+                <div class="report-table-container">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>العقار</th>
+                                <th>الحالة</th>
+                                <th>السعر</th>
+                                <th>المدينة</th>
+                                <th>الإضافات للمفضلة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${properties && properties.length > 0 ? properties.map(property => {
+                                const propertyFavorites = favorites ? favorites.filter(f => f.property_id === property.id).length : 0;
+                                return `
+                                    <tr>
+                                        <td>${property.title}</td>
+                                        <td>
+                                            <span class="status-badge status-${property.status}">
+                                                ${property.status === 'available' ? 'متاح' : 'مباع'}
+                                            </span>
+                                        </td>
+                                        <td>${property.price.toLocaleString()} ريال</td>
+                                        <td>${property.city}</td>
+                                        <td>${propertyFavorites}</td>
+                                    </tr>
+                                `;
+                            }).join('') : '<tr><td colspan="5" style="text-align: center;">لا توجد بيانات</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        console.error('Error:', err);
+        reportsContainer.innerHTML = '<div class="error">حدث خطأ في تحميل التقارير</div>';
+    }
+}
+
+// Function to load conversations
+async function loadConversations() {
+    const conversationsContainer = document.getElementById('conversations-container');
+    conversationsContainer.innerHTML = '<div class="loading">جاري تحميل المحادثات...</div>';
+    
+    try {
+        const { data, error } = await supabase
+            .from('conversations')
+            .select(`
+                *,
+                users (
+                    full_name,
+                    email
+                )
+            `)
+            .eq('owner_id', currentUser.id)
+            .order('created_at', { ascending: false });
+            
+        if (error) {
+            console.error('Error loading conversations:', error);
+            conversationsContainer.innerHTML = '<div class="error">خطأ في تحميل المحادثات</div>';
+            return;
+        }
+        
+        if (!data || data.length === 0) {
+            conversationsContainer.innerHTML = `
+                <div class="no-conversations">
+                    <i class="fas fa-comments"></i>
+                    <h3>لا توجد محادثات</h3>
+                    <p>لم تتلق أي رسائل بعد.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        conversationsContainer.innerHTML = '';
+        
+        data.forEach(conversation => {
+            const conversationDiv = document.createElement('div');
+            conversationDiv.className = 'conversation';
+            conversationDiv.innerHTML = `
+                <div class="conversation-header">
+                    <div class="conversation-user">
+                        <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="${conversation.users.full_name}" class="conversation-avatar">
+                        <div>
+                            <div class="conversation-name">${conversation.users.full_name}</div>
+                            <div class="conversation-email">${conversation.users.email}</div>
+                        </div>
+                    </div>
+                    <div class="conversation-date">${new Date(conversation.created_at).toLocaleDateString()}</div>
+                </div>
+                <div class="conversation-message">
+                    ${conversation.message}
+                </div>
+                <div class="conversation-actions">
+                    <button class="btn btn-primary btn-small" onclick="viewConversation('${conversation.id}')">
+                        عرض المحادثة
+                    </button>
+                    <button class="btn btn-outline btn-small" onclick="deleteConversation('${conversation.id}')">
+                        حذف
+                    </button>
+                </div>
+            `;
+            conversationsContainer.appendChild(conversationDiv);
+        });
+    } catch (err) {
+        console.error('Error:', err);
+        conversationsContainer.innerHTML = '<div class="error">حدث خطأ في تحميل المحادثات</div>';
+    }
+}
+
+// Function to view conversation
+function viewConversation(conversationId) {
+    alert(`عرض المحادثة: ${conversationId}`);
+    // TODO: Implement view conversation functionality
+}
+
+// Function to delete conversation
+async function deleteConversation(conversationId) {
+    if (!confirm('هل أنت متأكد من حذف هذه المحادثة؟')) {
+        return;
+    }
+    
+    try {
+        const { error } = await supabase
+            .from('conversations')
+            .delete()
+            .eq('id', conversationId);
+            
+        if (error) {
+            console.error('Error deleting conversation:', error);
+            alert('خطأ في حذف المحادثة: ' + error.message);
+            return;
+        }
+        
+        // Reload conversations
+        loadConversations();
+        alert('تم حذف المحادثة بنجاح');
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+}
+
+// Function to show add agent form
 function showAddAgentForm() {
     showModal('add-agent-modal');
 }
@@ -1551,322 +1881,42 @@ function showAddAgentForm() {
 document.getElementById('add-agent-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const email = document.getElementById('agent-email').value;
-    const name = document.getElementById('agent-name').value;
-    const phone = document.getElementById('agent-phone').value;
+    const agentData = {
+        name: document.getElementById('agent-name').value,
+        phone: document.getElementById('agent-phone').value,
+        email: document.getElementById('agent-email').value,
+        owner_id: currentUser.id
+    };
     
     try {
-        // Create user with auth
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-            email,
-            password: 'temporaryPassword123', // In a real app, you would generate a random password and send it to the user
-            options: {
-                data: {
-                    full_name: name
-                }
-            }
-        });
-        
-        if (authError) {
-            console.error('Error creating user:', authError);
-            alert('خطأ في إنشاء المستخدم: ' + authError.message);
+        const { data, error } = await supabase
+            .from('agents')
+            .insert([agentData]);
+            
+        if (error) {
+            console.error('Error adding agent:', error);
+            alert('خطأ في إضافة الوكيل: ' + error.message);
             return;
         }
         
-        // Create profile
-        if (authData.user) {
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .insert([
-                    { 
-                        id: authData.user.id, 
-                        full_name: name, 
-                        email: email,
-                        phone: phone,
-                        role: 'agent',
-                        owner_id: currentUser.id
-                    }
-                ]);
-                
-            if (profileError) {
-                console.error('Error creating profile:', profileError);
-                alert('خطأ في إنشاء ملف المستخدم: ' + profileError.message);
-                return;
-            }
-        }
-        
-        alert('تم إضافة الوكيل بنجاح. سيتم إرسال بريد إلكتروني بتفاصيل تسجيل الدخول.');
+        // Success - close modal and reload agents
         closeModal('add-agent-modal');
-        document.getElementById('add-agent-form').reset();
         loadOwnerAgents();
+        alert('تم إضافة الوكيل بنجاح');
+        
+        // Reset form
+        document.getElementById('add-agent-form').reset();
     } catch (err) {
         console.error('Error:', err);
         alert('حدث خطأ: ' + err.message);
     }
 });
 
-// Delete agent
-async function deleteAgent(agentId) {
-    if (!confirm('هل أنت متأكد من حذف هذا الوكيل؟')) {
-        return;
-    }
-    
-    try {
-        // Delete profile
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .delete()
-            .eq('id', agentId);
-            
-        if (profileError) {
-            console.error('Error deleting agent profile:', profileError);
-            alert('خطأ في حذف ملف الوكيل: ' + profileError.message);
-            return;
-        }
-        
-        // Note: In a real app, you might also want to delete the auth user or disable it
-        
-        alert('تم حذف الوكيل بنجاح');
-        loadOwnerAgents();
-    } catch (err) {
-        console.error('Error:', err);
-        alert('حدث خطأ: ' + err.message);
-    }
-}
-
-// Load conversations
-async function loadConversations() {
-    const conversationsList = document.getElementById('conversations-list');
-    conversationsList.innerHTML = '';
-    
-    try {
-        // Get agents
-        const { data: agents, error: agentsError } = await supabase
-            .from('profiles')
-            .select('id, full_name, email')
-            .eq('owner_id', currentUser.id)
-            .eq('role', 'agent');
-            
-        if (agentsError) {
-            console.error('Error loading agents:', agentsError);
-            return;
-        }
-        
-        // Get users who have sent messages to the owner
-        const { data: users, error: usersError } = await supabase
-            .from('messages')
-            .select('sender_id')
-            .eq('receiver_id', currentUser.id)
-            .neq('sender_id', currentUser.id);
-            
-        if (usersError) {
-            console.error('Error loading users:', usersError);
-            return;
-        }
-        
-        // Get unique user IDs
-        const userIds = [...new Set(users.map(u => u.sender_id))];
-        
-        // Get user profiles
-        const { data: userProfiles, error: userProfilesError } = await supabase
-            .from('profiles')
-            .select('id, full_name, email')
-            .in('id', userIds);
-            
-        if (userProfilesError) {
-            console.error('Error loading user profiles:', userProfilesError);
-            return;
-        }
-        
-        // Combine agents and users
-        const allContacts = [...(agents || []), ...(userProfiles || [])];
-        
-        if (allContacts.length === 0) {
-            conversationsList.innerHTML = `
-                <li style="text-align: center; padding: 20px;">
-                    لا توجد محادثات بعد
-                </li>
-            `;
-            return;
-        }
-        
-        allContacts.forEach(contact => {
-            const li = document.createElement('li');
-            li.setAttribute('data-contact-id', contact.id);
-            li.innerHTML = `
-                <div>${contact.full_name}</div>
-                <div style="font-size: 0.9rem; color: #777;">${contact.email}</div>
-            `;
-            li.onclick = () => loadMessages(contact.id, contact.full_name);
-            conversationsList.appendChild(li);
-        });
-    } catch (err) {
-        console.error('Error:', err);
-    }
-}
-
-// Load messages for a contact
-async function loadMessages(contactId, contactName) {
-    // Update active conversation
-    document.querySelectorAll('#conversations-list li').forEach(li => {
-        li.classList.remove('active');
-    });
-    document.querySelector(`#conversations-list li[data-contact-id="${contactId}"]`).classList.add('active');
-    
-    // Update chat header
-    document.getElementById('chat-header-name').textContent = contactName;
-    
-    // Clear messages
-    const messagesContainer = document.getElementById('chat-messages');
-    messagesContainer.innerHTML = '';
-    
-    // Set current contact ID
-    window.currentContactId = contactId;
-    
-    try {
-        const { data, error } = await supabase
-            .from('messages')
-            .select('*')
-            .or(`(sender_id.eq.${currentUser.id} AND receiver_id.eq.${contactId}), (sender_id.eq.${contactId} AND receiver_id.eq.${currentUser.id})`)
-            .order('created_at', { ascending: true });
-            
-        if (error) {
-            console.error('Error loading messages:', error);
-            return;
-        }
-        
-        if (!data || data.length === 0) {
-            messagesContainer.innerHTML = `
-                <div style="text-align: center; padding: 20px; color: #777;">
-                    لا توجد رسائل بعد
-                </div>
-            `;
-            return;
-        }
-        
-        data.forEach(message => {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${message.sender_id === currentUser.id ? 'sent' : 'received'}`;
-            messageDiv.innerHTML = `
-                <div class="message-content">
-                    ${message.content}
-                </div>
-            `;
-            messagesContainer.appendChild(messageDiv);
-        });
-        
-        // Scroll to bottom
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    } catch (err) {
-        console.error('Error:', err);
-    }
-}
-
-// Send message
-async function sendMessage() {
-    const messageInput = document.getElementById('message-input');
-    const content = messageInput.value.trim();
-    
-    if (!content || !window.currentContactId) {
-        return;
-    }
-    
-    try {
-        const { data, error } = await supabase
-            .from('messages')
-            .insert([{
-                sender_id: currentUser.id,
-                receiver_id: window.currentContactId,
-                content: content
-            }]);
-            
-        if (error) {
-            console.error('Error sending message:', error);
-            alert('خطأ في إرسال الرسالة: ' + error.message);
-            return;
-        }
-        
-        // Clear input
-        messageInput.value = '';
-        
-        // Reload messages
-        const contactName = document.getElementById('chat-header-name').textContent;
-        loadMessages(window.currentContactId, contactName);
-    } catch (err) {
-        console.error('Error:', err);
-        alert('حدث خطأ: ' + err.message);
-    }
-}
-
-// Load owner reports
-async function loadOwnerReports() {
-    try {
-        // Get total properties
-        const { data: propertiesData, error: propertiesError } = await supabase
-            .from('properties')
-            .select('id, status')
-            .eq('owner_id', currentUser.id);
-            
-        if (propertiesError) {
-            console.error('Error loading properties:', propertiesError);
-            return;
-        }
-        
-        // Get total agents
-        const { data: agentsData, error: agentsError } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('owner_id', currentUser.id)
-            .eq('role', 'agent');
-            
-        if (agentsError) {
-            console.error('Error loading agents:', agentsError);
-            return;
-        }
-        
-        // Calculate statistics
-        const totalProperties = propertiesData ? propertiesData.length : 0;
-        const availableProperties = propertiesData ? propertiesData.filter(p => p.status === 'available').length : 0;
-        const soldProperties = propertiesData ? propertiesData.filter(p => p.status === 'sold').length : 0;
-        const totalAgents = agentsData ? agentsData.length : 0;
-        
-        // Update UI
-        document.getElementById('total-properties').textContent = totalProperties;
-        document.getElementById('available-properties').textContent = availableProperties;
-        document.getElementById('sold-properties').textContent = soldProperties;
-        document.getElementById('total-agents').textContent = totalAgents;
-    } catch (err) {
-        console.error('Error:', err);
-    }
-}
-
-// Initialize the page
-window.onload = function() {
-    // Show home page by default
-    showHomePage();
-    
-    // Check if user is logged in
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if user is already logged in
     checkUserSession();
     
-    // Set up auth state change listener
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_IN') {
-            currentUser = session.user;
-            await updateUserUI(currentUser);
-            
-            // Ensure user has a profile
-            await ensureUserProfile(currentUser);
-        } else if (event === 'SIGNED_OUT') {
-            currentUser = null;
-            userProfile = null;
-            await updateUserUI(null);
-        } else if (event === 'USER_UPDATED') {
-            // This event is triggered when email is confirmed
-            if (session && session.user && session.user.email_confirmed_at) {
-                currentUser = session.user;
-                await updateUserUI(currentUser);
-                alert('تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول.');
-            }
-        }
-    });
-}
+    // Load home page properties
+    loadHomePageProperties();
+});
