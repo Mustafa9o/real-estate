@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
-        /* CSS styles remain the same */
+        /* CSS styles remain the same - no changes needed here */
         * {
             margin: 0;
             padding: 0;
@@ -1305,6 +1305,7 @@
                     <li><a href="#" onclick="showPropertiesListing()">عقارات للبيع</a></li>
                     <li><a href="#" onclick="showRentListing()">عقارات للإيجار</a></li>
                     <li><a href="#" onclick="showContactPage()">اتصل بنا</a></li>
+                    <li id="dashboard-link" style="display: none;"><a href="#" onclick="showOwnerDashboard()">لوحة التحكم</a></li>
                 </ul>
             </nav>
             
@@ -1840,7 +1841,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">إرسال رسالة</h3>
-                <button class="close-btn" onclick="closeModal('contact-modal')">&times;</button>
+                <button class="close-btn" onclick="closeContactModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="contact-modal-form">
@@ -2086,14 +2087,49 @@
         const supabaseUrl = 'https://oanuujxhmxngstijciie.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hbnV1anhobXhuZ3N0aWpjaWllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDc2NjAsImV4cCI6MjA3NDAyMzY2MH0.kiv8JpUxtTdDwDJTsMoDTb2vYNWbQMH19lzfYv7Xdzs';
 
+        // Function to create profiles table if it doesn't exist
+        async function ensureProfilesTable() {
+            if (!supabase) {
+                console.error('Supabase client not initialized');
+                return;
+            }
+            
+            try {
+                // Check if profiles table exists by trying to select from it
+                const { error } = await supabase
+                    .from('profiles')
+                    .select('count', { count: 'exact', head: true });
+                    
+                if (error) {
+                    console.error('Profiles table may not exist, error:', error);
+                    
+                    // Try to create the table via RPC call
+                    const { error: createError } = await supabase.rpc('create_profiles_table');
+                    
+                    if (createError) {
+                        console.error('Error creating profiles table:', createError);
+                    } else {
+                        console.log('Profiles table created successfully');
+                    }
+                } else {
+                    console.log('Profiles table exists');
+                }
+            } catch (err) {
+                console.error('Error ensuring profiles table:', err);
+            }
+        }
+
         // Initialize Supabase when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Initialize Supabase client
             if (window.supabase) {
                 supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
                 
+                // Ensure profiles table exists
+                await ensureProfilesTable();
+                
                 // Check if user is already logged in
-                checkUserSession();
+                await checkUserSession();
                 
                 // Load home page properties
                 loadHomePageProperties();
@@ -2103,12 +2139,15 @@
                 // Try to load the Supabase library dynamically
                 const script = document.createElement('script');
                 script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js';
-                script.onload = () => {
+                script.onload = async () => {
                     console.log('Supabase library loaded dynamically');
                     supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
                     
+                    // Ensure profiles table exists
+                    await ensureProfilesTable();
+                    
                     // Check if user is already logged in
-                    checkUserSession();
+                    await checkUserSession();
                     
                     // Load home page properties
                     loadHomePageProperties();
@@ -2148,7 +2187,7 @@
                     .from('profiles')
                     .select('*')
                     .eq('id', userId)
-                    .single();
+                    .maybeSingle(); // Use maybeSingle instead of single to avoid error if not found
                 
                 if (error) {
                     console.error('Error fetching user profile:', error);
@@ -2235,10 +2274,10 @@
                     .from('profiles')
                     .select('id')
                     .eq('id', user.id)
-                    .single();
+                    .maybeSingle(); // Use maybeSingle instead of single
                 
                 // If profile doesn't exist, create it
-                if (profileError && profileError.code === 'PGRST116') {
+                if (!profile || profileError) {
                     const fullName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'مستخدم';
                     
                     const { error: insertError } = await supabase
@@ -2254,11 +2293,30 @@
                     
                     if (insertError) {
                         console.error('Error creating profile:', insertError);
+                        
+                        // If there's still an error, try to create a minimal profile
+                        try {
+                            const { error: minimalError } = await supabase
+                                .from('profiles')
+                                .insert([
+                                    { 
+                                        id: user.id
+                                    }
+                                ]);
+                            
+                            if (minimalError) {
+                                console.error('Error creating minimal profile:', minimalError);
+                            } else {
+                                console.log('Created minimal profile successfully');
+                            }
+                        } catch (minimalErr) {
+                            console.error('Error creating minimal profile:', minimalErr);
+                        }
                     } else {
-                        // Update user profile after creation
-                        userProfile = await getUserProfile(user.id);
-                        await updateUserUI(user);
+                        console.log('Profile created successfully');
                     }
+                } else {
+                    console.log('Profile already exists');
                 }
             } catch (err) {
                 console.error('Error ensuring user profile:', err);
@@ -3611,7 +3669,7 @@
                     .from('properties')
                     .select('*')
                     .eq('id', propertyId)
-                    .single();
+                    .maybeSingle(); // Use maybeSingle instead of single
                     
                 if (error) {
                     console.error('Error fetching property:', error);
@@ -3817,7 +3875,7 @@
                     .from('agents')
                     .select('*')
                     .eq('id', agentId)
-                    .single();
+                    .maybeSingle(); // Use maybeSingle instead of single
                     
                 if (error) {
                     console.error('Error fetching agent:', error);
