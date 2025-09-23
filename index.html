@@ -114,6 +114,24 @@
             color: white;
         }
         
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
         /* User Info Styles */
         .user-info {
             display: none;
@@ -1087,6 +1105,113 @@
             color: #777;
         }
         
+        /* Request Card Styles */
+        .request-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .request-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+        }
+        
+        .request-type {
+            background-color: #e3f2fd;
+            color: #0277bd;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .request-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fff8e1;
+            color: #ffa000;
+        }
+        
+        .status-accepted {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-rejected {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .request-user, .request-message, .request-offer, .request-date {
+            margin-bottom: 10px;
+        }
+        
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .no-requests {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .no-requests i {
+            font-size: 48px;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+        
+        .no-requests h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .no-requests p {
+            color: #777;
+        }
+        
+        /* Image Upload Styles */
+        .image-upload-container {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .image-preview img {
+            width: 100px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
         /* Footer */
         footer {
             background-color: #333;
@@ -1484,6 +1609,9 @@
                         <button class="btn btn-primary btn-detail" onclick="openContactModal()">
                             <i class="fas fa-envelope"></i> إرسال رسالة
                         </button>
+                        <button id="request-btn" class="btn btn-success btn-detail" onclick="showRequestModal()">
+                            <i class="fas fa-handshake"></i> طلب <span id="request-type-text">شراء</span>
+                        </button>
                         <button class="btn btn-outline btn-detail" onclick="goBackToListing()">
                             <i class="fas fa-arrow-right"></i> العودة للقائمة
                         </button>
@@ -1625,6 +1753,9 @@
                                 <a href="#" onclick="showDashboardSection('messages')">الرسائل</a>
                             </li>
                             <li>
+                                <a href="#" onclick="showDashboardSection('requests')">الطلبات</a>
+                            </li>
+                            <li>
                                 <a href="#" onclick="showDashboardSection('reports')">التقارير</a>
                             </li>
                         </ul>
@@ -1688,6 +1819,17 @@
                             
                             <div id="conversations-container" class="conversations-container">
                                 <!-- Conversations will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Requests Section -->
+                        <div id="dashboard-requests" class="dashboard-section" style="display: none;">
+                            <div class="section-header">
+                                <h3 class="section-title">طلبات الشراء/الإيجار</h3>
+                            </div>
+                            
+                            <div id="requests-container">
+                                <!-- Requests will be loaded here -->
                             </div>
                         </div>
                         
@@ -1871,6 +2013,34 @@
         </div>
     </div>
     
+    <!-- Request Modal -->
+    <div id="request-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">طلب <span id="request-type-text">شراء</span></h3>
+                <button class="close-btn" onclick="closeModal('request-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="request-form">
+                    <div class="form-group">
+                        <label for="request-message">رسالة للمالك</label>
+                        <textarea id="request-message" class="form-control" rows="4" placeholder="أكتب رسالة للمالك..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="request-offer">عرض السعر (اختياري)</label>
+                        <input type="number" id="request-offer" class="form-control" placeholder="العرض المقترح">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="request-terms"> أوافق على الشروط والأحكام
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">إرسال الطلب</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     <!-- Add Property Modal -->
     <div id="add-property-modal" class="modal">
         <div class="modal-content">
@@ -1934,6 +2104,18 @@
                             <option value="available">متاح</option>
                             <option value="sold">مباع</option>
                         </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="property-images">صور العقار</label>
+                        <div class="image-upload-container">
+                            <div id="image-preview" class="image-preview"></div>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('property-images').click()">
+                                <i class="fas fa-upload"></i> رفع الصور
+                            </button>
+                            <input type="file" id="property-images" class="form-control" multiple accept="image/*" style="display: none;">
+                        </div>
+                        <small>يمكنك رفع ما يصل إلى 5 صور</small>
                     </div>
                     
                     <button type="submit" class="btn btn-primary" style="width: 100%;">إضافة العقار</button>
@@ -2007,6 +2189,18 @@
                             <option value="available">متاح</option>
                             <option value="sold">مباع</option>
                         </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-property-images">صور العقار</label>
+                        <div class="image-upload-container">
+                            <div id="edit-image-preview" class="image-preview"></div>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('edit-property-images').click()">
+                                <i class="fas fa-upload"></i> رفع الصور
+                            </button>
+                            <input type="file" id="edit-property-images" class="form-control" multiple accept="image/*" style="display: none;">
+                        </div>
+                        <small>يمكنك رفع ما يصل إلى 5 صور</small>
                     </div>
                     
                     <button type="submit" class="btn btn-primary" style="width: 100%;">تحديث العقار</button>
@@ -2165,6 +2359,8 @@
         let currentPropertyId = null;
         let currentUser = null;
         let userProfile = null;
+        let uploadedImages = [];
+        let editUploadedImages = [];
 
         // Modal functions
         function showModal(modalId) {
@@ -2809,6 +3005,7 @@
             const propertyCard = document.createElement('div');
             propertyCard.className = 'property-card';
             propertyCard.setAttribute('data-property-id', property.id);
+            propertyCard.setAttribute('data-property-type', property.type); // Add this line
             propertyCard.innerHTML = `
                 <div class="property-image">
                     <img src="${imageUrl}" alt="${property.title}">
@@ -3012,7 +3209,7 @@
             
             // Show/hide properties based on filter
             properties.forEach(property => {
-                const propertyType = property.getAttribute('data-type');
+                const propertyType = property.getAttribute('data-property-type');
                 if (type === 'all' || propertyType === type) {
                     property.style.display = 'block';
                 } else {
@@ -3192,6 +3389,7 @@
             document.getElementById('rent-search-results').style.display = 'none';
             
             currentPropertyId = propertyId;
+            currentPropertyType = propertyType;
             
             if (!supabase) {
                 alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
@@ -3235,10 +3433,12 @@
                 badgeElement.textContent = 'للبيع';
                 badgeElement.className = 'image-badge badge-sale-detail';
                 document.getElementById('detail-price').className = 'property-price price-sale-detail';
+                document.getElementById('request-type-text').textContent = 'شراء';
             } else {
                 badgeElement.textContent = 'للإيجار';
                 badgeElement.className = 'image-badge badge-rent-detail';
                 document.getElementById('detail-price').className = 'property-price price-rent-detail';
+                document.getElementById('request-type-text').textContent = 'إيجار';
             }
             
             // Update property features
@@ -3506,6 +3706,12 @@
             // Load agents
             loadOwnerAgents();
             
+            // Load conversations
+            loadConversations();
+            
+            // Load requests
+            loadOwnerRequests();
+            
             // Load reports
             loadOwnerReports();
         }
@@ -3535,6 +3741,8 @@
                 loadOwnerAgents();
             } else if (section === 'messages') {
                 loadConversations();
+            } else if (section === 'requests') {
+                loadOwnerRequests();
             } else if (section === 'reports') {
                 loadOwnerReports();
             }
@@ -3609,6 +3817,56 @@
             showModal('add-property-modal');
         }
 
+        // Image upload functionality
+        document.getElementById('property-images').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const preview = document.getElementById('image-preview');
+            
+            // Clear previous previews
+            preview.innerHTML = '';
+            uploadedImages = [];
+            
+            // Add new previews
+            for (let i = 0; i < Math.min(files.length, 5); i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    preview.appendChild(img);
+                    uploadedImages.push(event.target.result);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Edit image upload functionality
+        document.getElementById('edit-property-images').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const preview = document.getElementById('edit-image-preview');
+            
+            // Clear previous previews
+            preview.innerHTML = '';
+            editUploadedImages = [];
+            
+            // Add new previews
+            for (let i = 0; i < Math.min(files.length, 5); i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    preview.appendChild(img);
+                    editUploadedImages.push(event.target.result);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
         // Add property form submission
         document.getElementById('add-property-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -3629,7 +3887,8 @@
                 description: document.getElementById('property-description').value,
                 type: document.getElementById('property-type').value,
                 status: document.getElementById('property-status').value,
-                owner_id: currentUser.id
+                owner_id: currentUser.id,
+                image_urls: uploadedImages.length > 0 ? uploadedImages : null
             };
             
             try {
@@ -3650,6 +3909,8 @@
                 
                 // Reset form
                 document.getElementById('add-property-form').reset();
+                document.getElementById('image-preview').innerHTML = '';
+                uploadedImages = [];
             } catch (err) {
                 console.error('Error:', err);
                 alert('حدث خطأ: ' + err.message);
@@ -3721,6 +3982,11 @@
                 type: document.getElementById('edit-property-type').value,
                 status: document.getElementById('edit-property-status').value
             };
+            
+            // Only update images if new ones were uploaded
+            if (editUploadedImages.length > 0) {
+                propertyData.image_urls = editUploadedImages;
+            }
             
             try {
                 const { error } = await supabase
@@ -4196,203 +4462,519 @@
             }
         }
 
-        // Function to show add agent form
-        function showAddAgentForm() {
-            showModal('add-agent-modal');
-        }
-
-        // Add agent form submission
-        document.getElementById('add-agent-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Function to load owner requests
+        async function loadOwnerRequests() {
+            const requestsContainer = document.getElementById('requests-container');
+            requestsContainer.innerHTML = '<div class="loading">جاري تحميل الطلبات...</div>';
             
             if (!supabase) {
-                alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+                requestsContainer.innerHTML = '<div class="error">الخدمة غير متوفرة حالياً</div>';
                 return;
             }
-            
-            const agentData = {
-                name: document.getElementById('agent-name').value,
-                phone: document.getElementById('agent-phone').value,
-                email: document.getElementById('agent-email').value,
-                owner_id: currentUser.id
-            };
             
             try {
                 const { data, error } = await supabase
-                    .from('agents')
-                    .insert([agentData]);
+                    .from('property_requests')
+                    .select(`
+                        *,
+                        properties (title, type),
+                        users (full_name, email)
+                    `)
+                    .eq('owner_id', currentUser.id)
+                    .order('created_at', { ascending: false });
                     
                 if (error) {
-                    console.error('Error adding agent:', error);
-                    alert('خطأ في إضافة الوكيل: ' + error.message);
+                    console.error('Error loading requests:', error);
+                    requestsContainer.innerHTML = '<div class="error">خطأ في تحميل الطلبات</div>';
                     return;
                 }
                 
-                // Success - close modal and reload agents
-                closeModal('add-agent-modal');
-                loadOwnerAgents();
-                alert('تم إضافة الوكيل بنجاح');
+                if (!data || data.length === 0) {
+                    requestsContainer.innerHTML = `
+                        <div class="no-requests">
+                            <i class="fas fa-handshake"></i>
+                            <h3>لا توجد طلبات</h3>
+                            <p>لم تتلق أي طلبات شراء أو إيجار بعد.</p>
+                        </div>
+                    `;
+                    return;
+                }
                 
-                // Reset form
-                document.getElementById('add-agent-form').reset();
+                requestsContainer.innerHTML = '';
+                
+                data.forEach(request => {
+                    const requestDiv = document.createElement('div');
+                    requestDiv.className = 'request-card';
+                    requestDiv.innerHTML = `
+                        <div class="request-header">
+                            <div class="request-info">
+                                <h4>${request.properties.title}</h4>
+                                <div class="request-type">${request.type === 'sale' ? 'طلب شراء' : 'طلب إيجار'}</div>
+                            </div>
+                            <div class="request-status status-${request.status}">
+                                ${request.status === 'pending' ? 'قيد الانتظار' : request.status === 'accepted' ? 'مقبول' : 'مرفوض'}
+                            </div>
+                        </div>
+                        <div class="request-user">
+                            <strong>من:</strong> ${request.users.full_name} (${request.users.email})
+                        </div>
+                        <div class="request-message">
+                            <strong>الرسالة:</strong> ${request.message || 'لا توجد رسالة'}
+                        </div>
+                        ${request.offer ? `
+                        <div class="request-offer">
+                            <strong>العرض:</strong> ${request.offer.toLocaleString()} ريال
+                        </div>
+                        ` : ''}
+                        <div class="request-date">
+                            <strong>التاريخ:</strong> ${new Date(request.created_at).toLocaleString()}
+                        </div>
+                        ${request.status === 'pending' ? `
+                        <div class="request-actions">
+                            <button class="btn btn-success btn-small" onclick="updateRequestStatus('${request.id}', 'accepted')">
+                                قبول
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="updateRequestStatus('${request.id}', 'rejected')">
+                                رفض
+                            </button>
+                        </div>
+                        ` : ''}
+                    `;
+                    requestsContainer.appendChild(requestDiv);
+                });
             } catch (err) {
                 console.error('Error:', err);
-                alert('حدث خطأ: ' + err.message);
-            }
-        });
-
-        // Function to insert sample data
-        async function insertSampleData() {
-            if (!supabase) {
-                alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
-                return;
-            }
-            
-            // Sample properties
-            const sampleProperties = [
-                {
-                    title: 'فيلا فاخرة في حي النخيل',
-                    price: 2500000,
-                    city: 'الرياض',
-                    district: 'حي النخيل',
-                    area: 400,
-                    bedrooms: 5,
-                    bathrooms: 4,
-                    description: 'فيلا فاخرة جداً في حي النخيل، تتكون من طابقين مع حديقة ومرآب',
-                    type: 'sale',
-                    status: 'available',
-                    owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
-                    image_urls: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
-                    property_type: 'فيلا',
-                    owner_name: 'أحمد محمد',
-                    owner_phone: '0501234567',
-                    owner_email: 'ahmed@example.com',
-                    owner_avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-                    features: ['مسبح', 'حديقة', 'مرآب', 'غرفة خادمة'],
-                    parking: 2,
-                    floors: 2,
-                    year_built: 2020
-                },
-                {
-                    title: 'شقة عصرية في شارع التحلية',
-                    price: 800000,
-                    city: 'جدة',
-                    district: 'التحلية',
-                    area: 150,
-                    bedrooms: 3,
-                    bathrooms: 2,
-                    description: 'شقة عصرية في موقع مميز، قريبة من جميع الخدمات',
-                    type: 'sale',
-                    status: 'available',
-                    owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
-                    image_urls: ['https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
-                    property_type: 'شقة',
-                    owner_name: 'محمد علي',
-                    owner_phone: '0559876543',
-                    owner_email: 'mohammed@example.com',
-                    owner_avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-                    features: ['تكييف مركزي', 'مصعد', 'أمن', 'كاميرات مراقبة'],
-                    parking: 1,
-                    floors: 1,
-                    year_built: 2019
-                },
-                {
-                    title: 'شقة للإيجار في حي الملز',
-                    price: 35000,
-                    city: 'الرياض',
-                    district: 'الملز',
-                    area: 120,
-                    bedrooms: 2,
-                    bathrooms: 1,
-                    description: 'شقة للإيجار في حي الملز، مناسبة للعائلات',
-                    type: 'rent',
-                    status: 'available',
-                    owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
-                    image_urls: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'],
-                    property_type: 'شقة',
-                    owner_name: 'فاطمة أحمد',
-                    owner_phone: '0511223344',
-                    owner_email: 'fatima@example.com',
-                    owner_avatar: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
-                    features: ['أمن', 'موقف سيارة', 'مطبخ مجهز'],
-                    parking: 1,
-                    floors: 1,
-                    year_built: 2018
-                }
-            ];
-
-            // Sample agents
-            const sampleAgents = [
-                {
-                    name: 'سعد عبدالله',
-                    phone: '0501112233',
-                    email: 'saad@example.com',
-                    owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000'
-                },
-                {
-                    name: 'نورة محمد',
-                    phone: '0554445566',
-                    email: 'nora@example.com',
-                    owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000'
-                }
-            ];
-
-            // Sample conversations
-            const sampleConversations = [
-                {
-                    owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
-                    user_id: '11111111-1111-1111-1111-111111111111',
-                    message: 'أهلاً، أود الاستفسار عن الفيلة المعروضة في حي النخيل',
-                    created_at: new Date().toISOString()
-                },
-                {
-                    owner_id: currentUser?.id || '00000000-0000-0000-0000-000000000000',
-                    user_id: '22222222-2222-2222-2222-222222222222',
-                    message: 'هل الشقة في شارع التحلية لا تزال متاحة؟',
-                    created_at: new Date().toISOString()
-                }
-            ];
-
-            try {
-                // Insert properties
-                const { data: propertiesData, error: propertiesError } = await supabase
-                    .from('properties')
-                    .insert(sampleProperties);
-                    
-                if (propertiesError) {
-                    console.error('Error inserting sample properties:', propertiesError);
-                } else {
-                    console.log('Sample properties inserted:', propertiesData);
-                }
-
-                // Insert agents
-                const { data: agentsData, error: agentsError } = await supabase
-                    .from('agents')
-                    .insert(sampleAgents);
-                    
-                if (agentsError) {
-                    console.error('Error inserting sample agents:', agentsError);
-                } else {
-                    console.log('Sample agents inserted:', agentsData);
-                }
-
-                // Insert conversations
-                const { data: conversationsData, error: conversationsError } = await supabase
-                    .from('conversations')
-                    .insert(sampleConversations);
-                    
-                if (conversationsError) {
-                    console.error('Error inserting sample conversations:', conversationsError);
-                } else {
-                    console.log('Sample conversations inserted:', conversationsData);
-                }
-
-                alert('تم إضافة البيانات التجريبية بنجاح! يرجى تحديث الصفحة.');
-            } catch (err) {
-                console.error('Error inserting sample data:', err);
-                alert('حدث خطأ أثناء إضافة البيانات التجريبية: ' + err.message);
+                requestsContainer.innerHTML = '<div class="error">حدث خطأ في تحميل الطلبات</div>';
             }
         }
-    </script>
-</body>
-</html>
+
+        // Update request status
+// دالة تحديث حالة الطلب
+async function updateRequestStatus(requestId, status) {
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
+    try {
+        const { error } = await supabase
+            .from('property_requests')
+            .update({ status: status })
+            .eq('id', requestId);
+            
+        if (error) {
+            console.error('Error updating request status:', error);
+            alert('خطأ في تحديث حالة الطلب: ' + error.message);
+            return;
+        }
+        
+        // إعادة تحميل الطلبات
+        loadOwnerRequests();
+        alert(`تم ${status === 'accepted' ? 'قبول' : 'رفض'} الطلب بنجاح`);
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+}
+
+// دالة إظهار نافذة الطلب
+function showRequestModal() {
+    if (!currentUser) {
+        alert('يرجى تسجيل الدخول لإرسال طلب');
+        showModal('login-modal');
+        return;
+    }
+    
+    // تعيين نص نوع الطلب حسب نوع العقار الحالي
+    document.getElementById('request-type-text').textContent = currentPropertyType === 'sale' ? 'شراء' : 'إيجار';
+    
+    // إظهار النافذة
+    showModal('request-modal');
+}
+
+// دالة إغلاق نافذة الطلب
+function closeRequestModal() {
+    closeModal('request-modal');
+}
+
+// دالة إضافة بيانات تجريبية
+async function insertSampleData() {
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
+    try {
+        // بيانات عقارات تجريبية
+        const sampleProperties = [
+            {
+                title: 'فيلا فاخرة في حي النخيل',
+                price: 2500000,
+                city: 'الرياض',
+                district: 'حي النخيل',
+                area: 500,
+                bedrooms: 5,
+                bathrooms: 4,
+                description: 'فيلا فاخرة جداً في حي النخيل، تتكون من دورين وملحق، تشطيب فاخر، حديقة واسعة، ومسبح.',
+                type: 'sale',
+                status: 'available',
+                owner_id: currentUser ? currentUser.id : null,
+                image_urls: [
+                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80',
+                    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
+                ],
+                features: ['مسبح', 'حديقة', 'غرفة خادمة', 'مواقف سيارات', 'تشطيب فاخر']
+            },
+            {
+                title: 'شقة عصرية في حي الملز',
+                price: 800000,
+                city: 'الرياض',
+                district: 'حي الملز',
+                area: 180,
+                bedrooms: 3,
+                bathrooms: 2,
+                description: 'شقة عصرية في حي الملز، تشطيب عالي الجودة، إطلالة جميلة، قريبة من جميع الخدمات.',
+                type: 'sale',
+                status: 'available',
+                owner_id: currentUser ? currentUser.id : null,
+                image_urls: [
+                    'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
+                ],
+                features: ['تشطيب فاخر', 'مصعد', 'أمن', 'مواقف سيارات']
+            },
+            {
+                title: 'شقة للإيجار في حي السليمانية',
+                price: 45000,
+                city: 'الرياض',
+                district: 'حي السليمانية',
+                area: 120,
+                bedrooms: 2,
+                bathrooms: 1,
+                description: 'شقة جميلة للإيجار في حي السليمانية، قريبة من المرافق والخدمات.',
+                type: 'rent',
+                status: 'available',
+                owner_id: currentUser ? currentUser.id : null,
+                image_urls: [
+                    'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
+                ],
+                features: ['مكيفات', 'مطبخ مجهز', 'أمن', 'مواقف سيارات']
+            },
+            {
+                title: 'أرض سكنية في حي Yasmin',
+                price: 1200000,
+                city: 'الرياض',
+                district: 'حي الياسمين',
+                area: 600,
+                description: 'أرض سكنية في حي الياسمين، موقع مميز، مناسبة للبناء.',
+                type: 'sale',
+                status: 'available',
+                owner_id: currentUser ? currentUser.id : null,
+                image_urls: [
+                    'https://images.unsplash.com/photo-1502672260266-1c1ef2d73660?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80'
+                ],
+                features: ['موقع مميز', 'شوارع واسعة', 'خدمات متوفرة']
+            }
+        ];
+        
+        // إدخال العقارات التجريبية
+        const { data, error } = await supabase
+            .from('properties')
+            .insert(sampleProperties);
+            
+        if (error) {
+            console.error('Error inserting sample data:', error);
+            alert('خطأ في إضافة البيانات التجريبية: ' + error.message);
+            return;
+        }
+        
+        alert('تمت إضافة البيانات التجريبية بنجاح');
+        
+        // إعادة تحميل الصفحة الحالية
+        if (document.getElementById('home-page').style.display === 'block') {
+            loadHomePageProperties();
+        } else if (document.getElementById('properties-listing').style.display === 'block') {
+            showPropertiesListing();
+        } else if (document.getElementById('rent-listing').style.display === 'block') {
+            showRentListing();
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+}
+
+// مستمعات الأحداث للنماذج
+
+// نموذج الاتصال
+document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('contact-name').value;
+    const email = document.getElementById('contact-email').value;
+    const subject = document.getElementById('contact-subject').value;
+    const message = document.getElementById('contact-message').value;
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
+    try {
+        const { data, error } = await supabase
+            .from('contact_messages')
+            .insert([
+                { name, email, subject, message }
+            ]);
+            
+        if (error) {
+            console.error('Error sending contact message:', error);
+            alert('خطأ في إرسال الرسالة: ' + error.message);
+            return;
+        }
+        
+        alert('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
+        document.getElementById('contact-form').reset();
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+});
+
+// نموذج الاتصال في النافذة المنبثقة
+document.getElementById('contact-modal-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!currentPropertyId) {
+        alert('لم يتم تحديد العقار');
+        return;
+    }
+    
+    const name = document.getElementById('contact-modal-name').value;
+    const phone = document.getElementById('contact-modal-phone').value;
+    const email = document.getElementById('contact-modal-email').value;
+    const message = document.getElementById('contact-modal-message').value;
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
+    try {
+        // الحصول على تفاصيل العقار
+        const { data: property, error: propertyError } = await supabase
+            .from('properties')
+            .select('owner_id')
+            .eq('id', currentPropertyId)
+            .maybeSingle();
+            
+        if (propertyError || !property) {
+            console.error('Error fetching property:', propertyError || 'Property not found');
+            alert('خطأ في جلب بيانات العقار');
+            return;
+        }
+        
+        // إدراج المحادثة
+        const { data, error } = await supabase
+            .from('conversations')
+            .insert([
+                { 
+                    user_id: currentUser ? currentUser.id : null,
+                    owner_id: property.owner_id,
+                    property_id: currentPropertyId,
+                    name,
+                    phone,
+                    email,
+                    message
+                }
+            ]);
+            
+        if (error) {
+            console.error('Error sending message:', error);
+            alert('خطأ في إرسال الرسالة: ' + error.message);
+            return;
+        }
+        
+        alert('تم إرسال رسالتك بنجاح! سيتواصل معك المالك قريباً.');
+        closeContactModal();
+        document.getElementById('contact-modal-form').reset();
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+});
+
+// نموذج الطلب
+document.getElementById('request-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!currentPropertyId) {
+        alert('لم يتم تحديد العقار');
+        return;
+    }
+    
+    const message = document.getElementById('request-message').value;
+    const offer = document.getElementById('request-offer').value;
+    const terms = document.getElementById('request-terms').checked;
+    
+    if (!terms) {
+        alert('يجب الموافقة على الشروط والأحكام');
+        return;
+    }
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
+    try {
+        // الحصول على تفاصيل العقار
+        const { data: property, error: propertyError } = await supabase
+            .from('properties')
+            .select('owner_id, type')
+            .eq('id', currentPropertyId)
+            .maybeSingle();
+            
+        if (propertyError || !property) {
+            console.error('Error fetching property:', propertyError || 'Property not found');
+            alert('خطأ في جلب بيانات العقار');
+            return;
+        }
+        
+        // إدراج الطلب
+        const requestData = {
+            user_id: currentUser ? currentUser.id : null,
+            owner_id: property.owner_id,
+            property_id: currentPropertyId,
+            type: property.type,
+            message: message,
+            status: 'pending'
+        };
+        
+        if (offer) {
+            requestData.offer = parseFloat(offer);
+        }
+        
+        const { data, error } = await supabase
+            .from('property_requests')
+            .insert([requestData]);
+            
+        if (error) {
+            console.error('Error sending request:', error);
+            alert('خطأ في إرسال الطلب: ' + error.message);
+            return;
+        }
+        
+        alert('تم إرسال طلبك بنجاح! سيتم مراجعته من قبل المالك.');
+        closeModal('request-modal');
+        document.getElementById('request-form').reset();
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+});
+
+// نموذج إضافة وكيل
+document.getElementById('add-agent-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!supabase) {
+        alert('الخدمة غير متوفرة حالياً. يرجى المحاولة مرة أخرى لاحقاً.');
+        return;
+    }
+    
+    const agentData = {
+        name: document.getElementById('agent-name').value,
+        phone: document.getElementById('agent-phone').value,
+        email: document.getElementById('agent-email').value,
+        owner_id: currentUser.id
+    };
+    
+    try {
+        const { data, error } = await supabase
+            .from('agents')
+            .insert([agentData]);
+            
+        if (error) {
+            console.error('Error adding agent:', error);
+            alert('خطأ في إضافة الوكيل: ' + error.message);
+            return;
+        }
+        
+        // النجاح - إغلاق النافذة وإعادة تحميل الوكلاء
+        closeModal('add-agent-modal');
+        loadOwnerAgents();
+        alert('تم إضافة الوكيل بنجاح');
+        
+        // إعادة تعيين النموذج
+        document.getElementById('add-agent-form').reset();
+    } catch (err) {
+        console.error('Error:', err);
+        alert('حدث خطأ: ' + err.message);
+    }
+});
+
+// دالة إظهار المفضلة
+function showFavoritesPage() {
+    // إخفاء الصفحات الأخرى
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('properties-listing').style.display = 'none';
+    document.getElementById('rent-listing').style.display = 'none';
+    document.getElementById('property-detail').style.display = 'none';
+    document.getElementById('contact-page').style.display = 'none';
+    document.getElementById('owner-dashboard').style.display = 'none';
+    document.getElementById('search-results').style.display = 'none';
+    document.getElementById('sale-search-results').style.display = 'none';
+    document.getElementById('rent-search-results').style.display = 'none';
+    
+    // إظهار صفحة المفضلة
+    document.getElementById('favorites-page').style.display = 'block';
+    
+    // تحديث مسار التنقل
+    document.getElementById('breadcrumb-list').innerHTML = `
+        <li><a onclick="showHomePage()">الرئيسية</a></li>
+        <li>عقاراتي المفضلة</li>
+    `;
+    
+    // تحميل العقارات المفضلة
+    showFavorites();
+}
+
+// إضافة مستمع للنقر على رابط المفضلة في القائمة العلوية
+document.addEventListener('DOMContentLoaded', function() {
+    // إضافة رابط المفضلة للقائمة العلوية إذا كان المستخدم مسجلاً
+    const nav = document.querySelector('nav ul');
+    const favoritesLink = document.createElement('li');
+    favoritesLink.innerHTML = '<a href="#" onclick="showFavoritesPage()">المفضلة</a>';
+    favoritesLink.style.display = 'none'; // إخفاء بشكل افتراضي
+    favoritesLink.id = 'favorites-link';
+    nav.appendChild(favoritesLink);
+    
+    // تحديث واجهة المستخدم عند تحميل الصفحة
+    checkUserSession().then(() => {
+        if (currentUser) {
+            document.getElementById('favorites-link').style.display = 'block';
+        }
+    });
+});
+
+// دالة لتحديث رابط المفضلة بناءً على حالة تسجيل الدخول
+function updateFavoritesLink() {
+    const favoritesLink = document.getElementById('favorites-link');
+    if (favoritesLink) {
+        favoritesLink.style.display = currentUser ? 'block' : 'none';
+    }
+}
+
+// تحديث دالة تسجيل الخروج لإخفاء رابط المفضلة
+const originalLogout = logout;
+logout = async function() {
+    await originalLogout();
+    updateFavoritesLink();
+};
+
+// تحديث دالة updateUserUI لإظهار/إخفاء رابط المفضلة
+const originalUpdateUserUI = updateUserUI;
+updateUserUI = async function(user) {
+    await originalUpdateUserUI(user);
+    updateFavoritesLink();
+};
