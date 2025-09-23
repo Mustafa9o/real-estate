@@ -3,38 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عقارك - منصة العقارات الرائدة</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>عقارك - منصة العقارات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Header -->
-    <header>
-        <div class="container header-content">
-            <div class="logo" onclick="showHomePage()">
-                <i class="fas fa-building"></i>
-                <span>عقارك</span>
-            </div>
-            <nav>
-                <ul>
-                    <li><a href="#" onclick="showHomePage(); return false;">الرئيسية</a></li>
-                    <li><a href="#" onclick="showPropertiesListing(); return false;">عقارات للبيع</a></li>
-                    <li><a href="#" onclick="showRentListing(); return false;">عقارات للإيجار</a></li>
-                    <li><a href="#" onclick="showFavorites(); return false;">عقاراتي المفضلة</a></li>
-                    <li><a href="#">وكلاء عقاريون</a></li>
-                    <li><a href="#" onclick="showContactPage(); return false;">اتصل بنا</a></li>
-                    <li id="dashboard-link" style="display: none;"><a href="#" onclick="showOwnerDashboard(); return false;">لوحة التحكم</a></li>
-                </ul>
-            </nav>
-            <div class="auth-buttons" id="auth-buttons">
-                <button onclick="showModal('login-modal')">تسجيل الدخول</button>
-                <button onclick="showModal('register-modal')">إنشاء حساب</button>
-            </div>
-            <div class="user-info" id="user-info" style="display: none;">
-                <span id="user-name">مرحباً</span>
-                <button onclick="logout()">تسجيل الخروج</button>
-                <button onclick="setUserAsOwner()" style="background: var(--warning-color); margin-right: 5px;">تعيين كمالك</button>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>عقارك</h1>
+                </div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#" onclick="showHomePage()">الرئيسية</a></li>
+                        <li><a href="#" onclick="showPropertiesListing()">عقارات للبيع</a></li>
+                        <li><a href="#" onclick="showRentListing()">عقارات للإيجار</a></li>
+                        <li><a href="#" onclick="showContactPage()">اتصل بنا</a></li>
+                        <li id="dashboard-link" style="display: none;"><a href="#" onclick="showOwnerDashboard()">لوحة التحكم</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <div id="auth-buttons">
+                        <button class="btn btn-outline" onclick="showModal('login-modal')">تسجيل الدخول</button>
+                        <button class="btn btn-primary" onclick="showModal('register-modal')">إنشاء حساب</button>
+                    </div>
+                    <div id="user-info" style="display: none;">
+                        <span id="user-name"></span>
+                        <button class="btn btn-outline" onclick="logout()">تسجيل الخروج</button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -48,772 +48,435 @@
         </div>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="container">
+    <!-- Main Content -->
+    <main class="main-content">
         <!-- Home Page -->
-        <div id="home-page" class="home-page">
+        <div id="home-page" class="page">
             <!-- Hero Section -->
-            <div class="hero-section">
-                <div class="hero-content">
-                    <h1>منصتك الموثوقة للعقارات</h1>
-                    <p>ابحث عن عقار أحلامك من بين آلاف الخيارات المتاحة للبيع والإيجار في جميع أنحاء المملكة</p>
-                    <div class="search-form">
-                        <input type="text" id="search-input" placeholder="ابحث عن مدينة، حي، أو نوع عقار...">
-                        <button onclick="performSearch()"><i class="fas fa-search"></i> بحث</button>
+            <section class="hero">
+                <div class="container">
+                    <div class="hero-content">
+                        <h2>ابحث عن عقار أحلامك</h2>
+                        <p>أكبر منصة للعقارات في المملكة العربية السعودية</p>
+                        <div class="search-container">
+                            <input type="text" id="search-input" placeholder="ابحث عن مدينة، حي، أو نوع عقار...">
+                            <button class="btn btn-primary" onclick="performSearch()">
+                                <i class="fas fa-search"></i> بحث
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Search Results -->
-            <div id="search-results" class="search-results">
-                <h2 class="search-results-title">نتائج البحث</h2>
-                <div id="search-results-container"></div>
-            </div>
-            
-            <!-- Featured Properties Section -->
-            <h2 class="section-title">عقارات مميزة</h2>
-            <p class="section-subtitle">استعرض أحدث العقارات المضافة إلى منصتنا</p>
-            
-            <div class="category-tabs">
-                <div class="category-tab active" onclick="filterProperties('all')">الكل</div>
-                <div class="category-tab" onclick="filterProperties('sale')">للبيع</div>
-                <div class="category-tab" onclick="filterProperties('rent')">للإيجار</div>
-            </div>
-            
-            <!-- Properties Grid -->
-            <div class="properties-grid" id="home-properties-grid">
-                <!-- Property cards will be dynamically loaded here -->
-            </div>
-            
-            <!-- Call to Action -->
-            <div style="text-align: center; margin: 50px 0;">
-                <h2 style="font-size: 2rem; margin-bottom: 20px;">لم تجد ما تبحث عنه؟</h2>
-                <p style="margin-bottom: 30px; color: #777;">تصفح المزيد من العقارات أو سجل إشعارًا للعقارات الجديدة</p>
-                <div style="display: flex; justify-content: center; gap: 15px;">
-                    <button class="btn btn-primary" style="display: inline-block; width: auto; padding: 12px 25px;" onclick="showPropertiesListing()">
-                        <i class="fas fa-home"></i> عقارات للبيع
+            </section>
+
+            <!-- Categories Section -->
+            <section class="categories">
+                <div class="container">
+                    <h2 class="section-title">تصفح حسب الفئة</h2>
+                    <div class="categories-grid">
+                        <div class="category-card" onclick="showPropertiesListing()">
+                            <i class="fas fa-home"></i>
+                            <h3>عقارات للبيع</h3>
+                        </div>
+                        <div class="category-card" onclick="showRentListing()">
+                            <i class="fas fa-building"></i>
+                            <h3>عقارات للإيجار</h3>
+                        </div>
+                        <div class="category-card" onclick="showFavorites()">
+                            <i class="fas fa-heart"></i>
+                            <h3>عقاراتي المفضلة</h3>
+                        </div>
+                        <div class="category-card" onclick="showContactPage()">
+                            <i class="fas fa-phone-alt"></i>
+                            <h3>اتصل بنا</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Properties -->
+            <section class="featured-properties">
+                <div class="container">
+                    <h2 class="section-title">عقارات مميزة</h2>
+                    <div class="category-tabs">
+                        <button class="category-tab active" onclick="filterProperties('all')">الكل</button>
+                        <button class="category-tab" onclick="filterProperties('sale')">للبيع</button>
+                        <button class="category-tab" onclick="filterProperties('rent')">للإيجار</button>
+                    </div>
+                    <div class="properties-grid" id="home-properties-grid">
+                        <!-- Properties will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section class="about">
+                <div class="container">
+                    <div class="about-content">
+                        <div class="about-text">
+                            <h2>من نحن</h2>
+                            <p>عقارك هي المنصة الرائدة في المملكة العربية السعودية لبيع وشراء وتأجير العقارات. نقدم لك أفضل الخيارات العقارية بسهولة ويسر.</p>
+                            <p>مع أكثر من 10 سنوات من الخبرة في السوق العقاري، نساعدك في العثور على العقار المناسب لك بسرعة وأمان.</p>
+                            <button class="btn btn-primary" onclick="showContactPage()">تواصل معنا</button>
+                        </div>
+                        <div class="about-image">
+                            <img src="https://images.unsplash.com/photo-1560518883-ce0905ee08b9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="عقارك">
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Properties Listing (For Sale) -->
+        <div id="properties-listing" class="page" style="display: none;">
+            <div class="container">
+                <h2 class="section-title">عقارات للبيع</h2>
+                <div class="search-container">
+                    <input type="text" id="sale-search-input" placeholder="ابحث عن عقار للبيع...">
+                    <button class="btn btn-primary" onclick="performSaleSearch()">
+                        <i class="fas fa-search"></i> بحث
                     </button>
-                    <button class="btn btn-outline" style="display: inline-block; width: auto; padding: 12px 25px;" onclick="showRentListing()">
-                        <i class="fas fa-key"></i> عقارات للإيجار
+                </div>
+                <div class="properties-grid" id="sale-properties-grid">
+                    <!-- Properties will be loaded here -->
+                </div>
+                <div id="sale-search-results" style="display: none;">
+                    <h3>نتائج البحث</h3>
+                    <div class="properties-grid" id="sale-search-results-container">
+                        <!-- Search results will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rent Properties Listing -->
+        <div id="rent-listing" class="page" style="display: none;">
+            <div class="container">
+                <h2 class="section-title">عقارات للإيجار</h2>
+                <div class="search-container">
+                    <input type="text" id="rent-search-input" placeholder="ابحث عن عقار للإيجار...">
+                    <button class="btn btn-primary" onclick="performRentSearch()">
+                        <i class="fas fa-search"></i> بحث
                     </button>
                 </div>
+                <div class="properties-grid" id="rent-properties-grid">
+                    <!-- Properties will be loaded here -->
+                </div>
+                <div id="rent-search-results" style="display: none;">
+                    <h3>نتائج البحث</h3>
+                    <div class="properties-grid" id="rent-search-results-container">
+                        <!-- Search results will be loaded here -->
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <!-- Properties Listing Page -->
-        <div id="properties-listing" class="properties-listing">
-            <h1 class="page-title">عقارات للبيع</h1>
-            
-            <!-- Page Search -->
-            <div class="page-search">
-                <div class="page-search-form">
-                    <input type="text" id="sale-search-input" placeholder="ابحث عن مدينة، حي، أو نوع عقار...">
-                    <button onclick="performSaleSearch()"><i class="fas fa-search"></i> بحث</button>
-                </div>
-            </div>
-            
-            <!-- Search Results -->
-            <div id="sale-search-results" class="search-results">
-                <h2 class="search-results-title">نتائج البحث</h2>
-                <div id="sale-search-results-container"></div>
-            </div>
-            
-            <!-- Properties Grid -->
-            <div class="properties-grid" id="sale-properties-grid">
-                <!-- Property cards will be dynamically loaded here -->
-            </div>
-        </div>
-        
-        <!-- Rent Properties Listing Page -->
-        <div id="rent-listing" class="rent-listing">
-            <h1 class="page-title">عقارات للإيجار</h1>
-            
-            <!-- Page Search -->
-            <div class="page-search">
-                <div class="page-search-form">
-                    <input type="text" id="rent-search-input" placeholder="ابحث عن مدينة، حي، أو نوع عقار...">
-                    <button onclick="performRentSearch()"><i class="fas fa-search"></i> بحث</button>
-                </div>
-            </div>
-            
-            <!-- Search Results -->
-            <div id="rent-search-results" class="search-results">
-                <h2 class="search-results-title">نتائج البحث</h2>
-                <div id="rent-search-results-container"></div>
-            </div>
-            
-            <!-- Properties Grid -->
-            <div class="properties-grid" id="rent-properties-grid">
-                <!-- Property cards will be dynamically loaded here -->
-            </div>
-        </div>
-        
-        <!-- Favorites Page -->
-        <div id="favorites-page" class="favorites-page">
-            <h1 class="page-title">عقاراتي المفضلة</h1>
-            <div class="properties-grid" id="favorites-grid">
-                <!-- Favorite properties will be loaded here -->
-            </div>
-        </div>
-        
-        <!-- Property Details Page -->
-        <div id="property-detail" class="property-detail">
-            <button class="back-button" onclick="goBackToListing()">
-                <i class="fas fa-arrow-right"></i> العودة إلى القائمة
-            </button>
-            
-            <div class="property-header">
-                <h1 class="property-title" id="detail-title">فيلا فاخرة للبيع في حي الروضة</h1>
-                <div class="property-price" id="detail-price">1,250,000 ريال</div>
-            </div>
-            
-            <div class="property-address">
-                <i class="fas fa-map-marker-alt"></i>
-                <span id="detail-address">حي الروضة، الرياض، المملكة العربية السعودية</span>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="action-btn btn-favorite" id="detail-favorite-btn">
-                    <i class="fas fa-heart"></i> حفظ العقار
-                </button>
-                <button class="action-btn btn-share">
-                    <i class="fas fa-share-alt"></i> مشاركة
-                </button>
-                <button class="action-btn btn-print">
-                    <i class="fas fa-print"></i> طباعة
-                </button>
-            </div>
-            
-            <!-- Gallery -->
-            <div class="property-gallery">
-                <div class="main-image">
-                    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1176&q=80" alt="فيلا فاخرة" id="main-image">
-                    <div class="image-badge" id="detail-badge">للبيع</div>
-                </div>
-                <div class="thumbnails">
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1176&q=80')">
-                        <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1176&q=80" alt="صورة خارجية">
-                        <div class="thumbnail-overlay">
-                            <i class="fas fa-search-plus"></i>
-                        </div>
-                    </div>
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1600566753052-d6f4e67238e1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80')">
-                        <img src="https://images.unsplash.com/photo-1600566753052-d6f4e67238e1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="صورة الصالة">
-                        <div class="thumbnail-overlay">
-                            <i class="fas fa-search-plus"></i>
-                        </div>
-                    </div>
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80')">
-                        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="صورة المطبخ">
-                        <div class="thumbnail-overlay">
-                            <i class="fas fa-search-plus"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Property Content -->
-            <div class="property-content">
-                <!-- Left Column -->
-                <div>
-                    <!-- Details Section -->
-                    <div class="details-section">
-                        <h2 class="section-title">تفاصيل العقار</h2>
-                        
-                        <div class="property-features">
-                            <div class="feature">
-                                <i class="fas fa-ruler-combined"></i>
-                                <div>
-                                    <span class="feature-value">320 م²</span>
-                                    <span class="feature-label">المساحة</span>
-                                </div>
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-bed"></i>
-                                <div>
-                                    <span class="feature-value">4</span>
-                                    <span class="feature-label">غرف نوم</span>
-                                </div>
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-bath"></i>
-                                <div>
-                                    <span class="feature-value">3</span>
-                                    <span class="feature-label">حمامات</span>
-                                </div>
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-car"></i>
-                                <div>
-                                    <span class="feature-value">2</span>
-                                    <span class="feature-label">مواقف سيارات</span>
-                                </div>
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-building"></i>
-                                <div>
-                                    <span class="feature-value">دورين</span>
-                                    <span class="feature-label">عدد الأدوار</span>
-                                </div>
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-calendar-alt"></i>
-                                <div>
-                                    <span class="feature-value">2022</span>
-                                    <span class="feature-label">سنة البناء</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <h3 class="section-title">الوصف</h3>
-                        <p class="property-description" id="detail-description">
-                            فيلا فاخرة للبيع في حي الروضة، مساحة الأرض 320 متر مربع، مكونة من دورين، تحتوي على 4 غرف نوم و3 حمامات وصالة كبيرة ومطبخ مجهز بأحدث الأجهزة. الفيلا تتميز بتصميمها العصري وتشطيبها الفاخر، وتطل على شارع رئيسي مع موقفين للسيارات. الموقع ممتاز وقريب من الخدمات والمرافق العامة مثل المدارس والمستشفيات والمراكز التجارية.
-                        </p>
-                        
-                        <h3 class="section-title">المرافق المتوفرة</h3>
-                        <div class="amenities">
-                            <div class="amenity">
-                                <i class="fas fa-check-circle"></i>
-                                <span>تكييف مركزي</span>
-                            </div>
-                            <div class="amenity">
-                                <i class="fas fa-check-circle"></i>
-                                <span>نظام إنذار ضد الحريق</span>
-                            </div>
-                            <div class="amenity">
-                                <i class="fas fa-check-circle"></i>
-                                <span>أنظمة أمنية</span>
-                            </div>
-                            <div class="amenity">
-                                <i class="fas fa-check-circle"></i>
-                                <span>خزانات</span>
-                            </div>
-                            <div class="amenity">
-                                <i class="fas fa-check-circle"></i>
-                                <span>سخانات مياه</span>
-                            </div>
-                            <div class="amenity">
-                                <i class="fas fa-check-circle"></i>
-                                <span>حديقة خاصة</span>
-                            </div>
-                            <div class="amenity">
-                                <i class="fas fa-check-circle"></i>
-                                <span>مواقف سيارات</span>
-                            </div>
-                            <div class="amenity">
-                                <i class="fas fa-check-circle"></i>
-                                <span>غرفة خادمة</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Map Section -->
-                    <div class="map-section">
-                        <h2 class="section-title">الموقع</h2>
-                        <div id="property-map"></div>
-                    </div>
-                </div>
-                
-                <!-- Right Column -->
-                <div>
-                    <!-- Owner Section -->
-                    <div class="owner-section">
-                        <h2 class="section-title">معلومات المالك</h2>
-                        
-                        <div class="owner-info">
-                            <div class="owner-avatar">
-                                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="صورة المالك" id="owner-avatar-img">
-                            </div>
-                            <div class="owner-details">
-                                <h3 id="owner-name">محمد أحمد</h3>
-                                <p>عضو منذ 2020</p>
-                            </div>
-                        </div>
-                        
-                        <div class="contact-info">
-                            <div class="contact-item">
-                                <i class="fas fa-phone"></i>
-                                <span class="phone-number" id="owner-phone">+966 55 123 4567</span>
-                            </div>
-                            <div class="contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <span id="owner-email">mohamed.ahmed@example.com</span>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary" onclick="openContactModal()">
-                            <i class="fas fa-envelope"></i> إرسال رسالة
+
+        <!-- Property Detail -->
+        <div id="property-detail" class="page" style="display: none;">
+            <div class="container">
+                <div class="property-detail-container">
+                    <div class="property-detail-header">
+                        <button class="btn btn-outline" onclick="goBackToListing()">
+                            <i class="fas fa-arrow-right"></i> العودة
                         </button>
-                        <button class="btn btn-whatsapp">
-                            <i class="fab fa-whatsapp"></i> التواصل عبر واتساب
-                        </button>
-                        <button class="btn btn-outline" onclick="showPhoneNumber()">
-                            <i class="fas fa-phone"></i> عرض رقم الهاتف
+                        <button id="detail-favorite-btn" class="btn btn-outline" onclick="addToFavorites('')">
+                            <i class="fas fa-heart"></i> حفظ العقار
                         </button>
                     </div>
                     
-                    <!-- Contact Form Modal -->
-                    <div id="contact-modal" class="modal">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h2>إرسال رسالة إلى المالك</h2>
-                                <span class="close-modal" onclick="closeContactModal()">&times;</span>
+                    <div class="property-detail-content">
+                        <div class="property-gallery">
+                            <div class="main-image-container">
+                                <img id="main-image" src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="عقار" class="main-image">
+                                <div id="detail-badge" class="image-badge">للبيع</div>
                             </div>
-                            <form>
-                                <div class="form-group">
-                                    <label>اسمك</label>
-                                    <input type="text" required>
+                            <div class="thumbnails">
+                                <div class="thumbnail">
+                                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="عقار" onclick="changeImage('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80')">
                                 </div>
-                                <div class="form-group">
-                                    <label>بريدك الإلكتروني</label>
-                                    <input type="email" required>
+                                <div class="thumbnail">
+                                    <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="عقار" onclick="changeImage('https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80')">
                                 </div>
-                                <div class="form-group">
-                                    <label>رقم هاتفك</label>
-                                    <input type="tel">
+                                <div class="thumbnail">
+                                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="عقار" onclick="changeImage('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80')">
                                 </div>
-                                <div class="form-group">
-                                    <label>رسالتك</label>
-                                    <textarea placeholder="أهتم بالعقار وأرغب في معرفة المزيد من التفاصيل..." required></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="property-info">
+                            <h2 id="detail-title">عنوان العقار</h2>
+                            <div id="detail-price" class="property-price">1,000,000 ريال</div>
+                            <div id="detail-address" class="property-address">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>الرياض، المملكة العربية السعودية</span>
+                            </div>
+                            
+                            <div class="property-features">
+                                <!-- Features will be loaded here -->
+                            </div>
+                            
+                            <div class="property-description">
+                                <h3>الوصف</h3>
+                                <p id="detail-description">وصف العقار</p>
+                            </div>
+                            
+                            <div class="property-amenities">
+                                <h3>المرافق</h3>
+                                <div class="amenities">
+                                    <!-- Amenities will be loaded here -->
                                 </div>
-                                <button type="submit" class="btn btn-primary">إرسال الرسالة</button>
-                            </form>
+                            </div>
+                            
+                            <div class="property-map">
+                                <h3>الموقع</h3>
+                                <div id="property-map" class="map-container"></div>
+                            </div>
+                            
+                            <div class="property-owner">
+                                <h3>معلومات المالك</h3>
+                                <div class="owner-info">
+                                    <div class="owner-avatar">
+                                        <img id="owner-avatar-img" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="الملك">
+                                    </div>
+                                    <div class="owner-details">
+                                        <div class="owner-name" id="owner-name">اسم المالك</div>
+                                        <div class="owner-phone" id="owner-phone">رقم الهاتف</div>
+                                        <div class="owner-email" id="owner-email">البريد الإلكتروني</div>
+                                    </div>
+                                    <div class="owner-actions">
+                                        <button class="btn btn-primary" onclick="showPhoneNumber()">إظهار رقم الهاتف</button>
+                                        <button class="btn btn-outline" onclick="openContactModal()">إرسال رسالة</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Contact Page -->
-        <div id="contact-page" class="contact-page">
-            <h1 class="page-title">اتصل بنا</h1>
-            
-            <div class="contact-container">
-                <!-- Contact Information Section -->
-                <div class="contact-info-section">
-                    <h2 class="section-title">معلومات الاتصال</h2>
+        <div id="contact-page" class="page" style="display: none;">
+            <div class="container">
+                <h2 class="section-title">اتصل بنا</h2>
+                <div class="contact-container">
+                    <div class="contact-info">
+                        <h3>معلومات الاتصال</h3>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>العنوان</h4>
+                                <p>شارع الملك فهد، الرياض، المملكة العربية السعودية</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone-alt"></i>
+                            <div>
+                                <h4>الهاتف</h4>
+                                <p>+966 12 345 6789</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>البريد الإلكتروني</h4>
+                                <p>info@aqarak.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h4>ساعات العمل</h4>
+                                <p>الأحد - الخميس: 9:00 ص - 6:00 م</p>
+                                <p>الجمعة - السبت: 10:00 ص - 4:00 م</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-form-container">
+                        <h3>أرسل لنا رسالة</h3>
+                        <form id="contact-form" class="contact-form">
+                            <div class="form-group">
+                                <label for="contact-name">الاسم</label>
+                                <input type="text" id="contact-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-email">البريد الإلكتروني</label>
+                                <input type="email" id="contact-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-subject">الموضوع</label>
+                                <input type="text" id="contact-subject" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-message">الرسالة</label>
+                                <textarea id="contact-message" rows="5" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">إرسال الرسالة</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="contact-map">
+                    <h3>موقعنا على الخريطة</h3>
+                    <div id="contact-map" class="map-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favorites Page -->
+        <div id="favorites-page" class="page" style="display: none;">
+            <div class="container">
+                <h2 class="section-title">عقاراتي المفضلة</h2>
+                <div class="properties-grid" id="favorites-grid">
+                    <!-- Favorite properties will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Owner Dashboard -->
+        <div id="owner-dashboard" class="page" style="display: none;">
+            <div class="container">
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <h2>لوحة التحكم</h2>
+                        <div class="dashboard-actions">
+                            <button class="btn btn-primary" onclick="showAddPropertyForm()">إضافة عقار جديد</button>
+                            <button class="btn btn-outline" onclick="showAddAgentForm()">إضافة وكيل جديد</button>
+                        </div>
+                    </div>
                     
-                    <div class="contact-info-item">
+                    <div class="dashboard-content">
+                        <div class="sidebar">
+                            <ul>
+                                <li class="active" onclick="showDashboardSection('properties')">
+                                    <i class="fas fa-building"></i> العقارات
+                                </li>
+                                <li onclick="showDashboardSection('agents')">
+                                    <i class="fas fa-user-tie"></i> الوكلاء
+                                </li>
+                                <li onclick="showDashboardSection('messages')">
+                                    <i class="fas fa-comments"></i> الرسائل
+                                </li>
+                                <li onclick="showDashboardSection('reports')">
+                                    <i class="fas fa-chart-bar"></i> التقارير
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="dashboard-main">
+                            <!-- Properties Section -->
+                            <div id="dashboard-properties" class="dashboard-section">
+                                <h3>العقارات</h3>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>العنوان</th>
+                                                <th>السعر</th>
+                                                <th>المدينة</th>
+                                                <th>الحالة</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="properties-tbody">
+                                            <!-- Properties will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Agents Section -->
+                            <div id="dashboard-agents" class="dashboard-section" style="display: none;">
+                                <h3>الوكلاء</h3>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>الاسم</th>
+                                                <th>الهاتف</th>
+                                                <th>البريد الإلكتروني</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="agents-tbody">
+                                            <!-- Agents will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Messages Section -->
+                            <div id="dashboard-messages" class="dashboard-section" style="display: none;">
+                                <h3>الرسائل</h3>
+                                <div id="conversations-container">
+                                    <!-- Conversations will be loaded here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Reports Section -->
+                            <div id="dashboard-reports" class="dashboard-section" style="display: none;">
+                                <h3>التقارير</h3>
+                                <div id="reports-container">
+                                    <!-- Reports will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results (Home Page) -->
+        <div id="search-results" style="display: none;">
+            <div class="container">
+                <h3>نتائج البحث</h3>
+                <div class="properties-grid" id="search-results-container">
+                    <!-- Search results will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>عقارك</h2>
+                    <p>منصتك الموثوقة للعقارات في المملكة العربية السعودية</p>
+                </div>
+                <div class="footer-links">
+                    <h3>روابط سريعة</h3>
+                    <ul>
+                        <li><a href="#" onclick="showHomePage()">الرئيسية</a></li>
+                        <li><a href="#" onclick="showPropertiesListing()">عقارات للبيع</a></li>
+                        <li><a href="#" onclick="showRentListing()">عقارات للإيجار</a></li>
+                        <li><a href="#" onclick="showContactPage()">اتصل بنا</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3>تواصل معنا</h3>
+                    <div class="contact-item">
                         <i class="fas fa-map-marker-alt"></i>
-                        <div class="contact-info-content">
-                            <h3>العنوان</h3>
-                            <p>شارع الملك فهد، حي النخيل<br>الرياض، المملكة العربية السعودية</p>
-                        </div>
+                        <p>شارع الملك فهد، الرياض، المملكة العربية السعودية</p>
                     </div>
-                    
-                    <div class="contact-info-item">
-                        <i class="fas fa-phone"></i>
-                        <div class="contact-info-content">
-                            <h3>الهاتف</h3>
-                            <p>+966 11 234 5678<br>+966 920 000 123</p>
-                        </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone-alt"></i>
+                        <p>+966 12 345 6789</p>
                     </div>
-                    
-                    <div class="contact-info-item">
+                    <div class="contact-item">
                         <i class="fas fa-envelope"></i>
-                        <div class="contact-info-content">
-                            <h3>البريد الإلكتروني</h3>
-                            <p>info@aqarak.com<br>support@aqarak.com</p>
-                        </div>
+                        <p>info@aqarak.com</p>
                     </div>
-                    
-                    <div class="contact-info-item">
-                        <i class="fas fa-clock"></i>
-                        <div class="contact-info-content">
-                            <h3>ساعات العمل</h3>
-                            <p>الأحد - الخميس: 8:00 ص - 6:00 م<br>الجمعة - السبت: 10:00 ص - 4:00 م</p>
-                        </div>
-                    </div>
-                    
-                    <h3 class="section-title">تابعنا على وسائل التواصل</h3>
+                </div>
+                <div class="footer-social">
+                    <h3>تابعنا</h3>
                     <div class="social-links">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
                         <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                
-                <!-- Contact Form Section -->
-                <div class="contact-form-section">
-                    <h2 class="section-title">إرسال رسالة</h2>
-                    
-                    <form>
-                        <div class="form-group">
-                            <label>الاسم الكامل</label>
-                            <input type="text" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>البريد الإلكتروني</label>
-                            <input type="email" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>رقم الهاتف</label>
-                            <input type="tel" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>نوع الرسالة</label>
-                            <select>
-                                <option value="general">استفسار عام</option>
-                                <option value="support">دعم فني</option>
-                                <option value="partnership">شراكة</option>
-                                <option value="complaint">شكوى</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الرسالة</label>
-                            <textarea placeholder="اكتب رسالتك هنا..." required></textarea>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">إرسال الرسالة</button>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Map Section -->
-            <div class="map-section">
-                <h2 class="section-title">موقعنا على الخريطة</h2>
-                <div id="contact-map"></div>
-            </div>
-        </div>
-        
-        <!-- Owner Dashboard -->
-        <div id="owner-dashboard" class="owner-dashboard" style="display: none;">
-            <div class="container">
-                <h1 class="page-title">لوحة التحكم</h1>
-                
-                <div class="dashboard-container">
-                    <!-- Sidebar -->
-                    <div class="sidebar">
-                        <ul>
-                            <li class="active"><a href="#" onclick="showDashboardSection('properties')">إدارة العقارات</a></li>
-                            <li><a href="#" onclick="showDashboardSection('agents')">إدارة الوكلاء</a></li>
-                            <li><a href="#" onclick="showDashboardSection('messages')">الرسائل</a></li>
-                            <li><a href="#" onclick="showDashboardSection('reports')">التقارير</a></li>
-                        </ul>
-                    </div>
-                    
-                    <!-- Main Content -->
-                    <div class="dashboard-content">
-                        <!-- Properties Section -->
-                        <div id="dashboard-properties" class="dashboard-section">
-                            <div class="section-header">
-                                <h2>إدارة العقارات</h2>
-                                <button class="btn btn-primary" onclick="showAddPropertyForm()">إضافة عقار جديد</button>
-                            </div>
-                            
-                            <!-- Properties Table -->
-                            <div class="table-container">
-                                <table class="properties-table">
-                                    <thead>
-                                        <tr>
-                                            <th>العنوان</th>
-                                            <th>السعر</th>
-                                            <th>المدينة</th>
-                                            <th>الحالة</th>
-                                            <th>الإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="properties-tbody">
-                                        <!-- Properties will be loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <!-- Agents Section -->
-                        <div id="dashboard-agents" class="dashboard-section" style="display: none;">
-                            <div class="section-header">
-                                <h2>إدارة الوكلاء</h2>
-                                <button class="btn btn-primary" onclick="showAddAgentForm()">إضافة وكيل جديد</button>
-                            </div>
-                            
-                            <!-- Agents Table -->
-                            <div class="table-container">
-                                <table class="agents-table">
-                                    <thead>
-                                        <tr>
-                                            <th>الاسم</th>
-                                            <th>البريد الإلكتروني</th>
-                                            <th>تاريخ الانضمام</th>
-                                            <th>الإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="agents-tbody">
-                                        <!-- Agents will be loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <!-- Messages Section -->
-                        <div id="dashboard-messages" class="dashboard-section" style="display: none;">
-                            <div class="section-header">
-                                <h2>الرسائل</h2>
-                            </div>
-                            
-                            <div class="messages-container">
-                                <div class="conversations-list">
-                                    <h3>المحادثات</h3>
-                                    <ul id="conversations-list">
-                                        <!-- Conversations will be loaded here -->
-                                    </ul>
-                                </div>
-                                
-                                <div class="chat-container">
-                                    <div class="chat-header">
-                                        <h3 id="chat-header-name">اختر محادثة</h3>
-                                    </div>
-                                    <div class="chat-messages" id="chat-messages">
-                                        <!-- Messages will be loaded here -->
-                                    </div>
-                                    <div class="chat-input">
-                                        <input type="text" id="message-input" placeholder="اكتب رسالتك...">
-                                        <button onclick="sendMessage()">إرسال</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Reports Section -->
-                        <div id="dashboard-reports" class="dashboard-section" style="display: none;">
-                            <div class="section-header">
-                                <h2>التقارير</h2>
-                            </div>
-                            
-                            <div class="reports-container">
-                                <div class="report-card">
-                                    <h3>إجمالي العقارات</h3>
-                                    <p class="report-value" id="total-properties">0</p>
-                                </div>
-                                
-                                <div class="report-card">
-                                    <h3>العقارات المتاحة</h3>
-                                    <p class="report-value" id="available-properties">0</p>
-                                </div>
-                                
-                                <div class="report-card">
-                                    <h3>العقارات المباعة</h3>
-                                    <p class="report-value" id="sold-properties">0</p>
-                                </div>
-                                
-                                <div class="report-card">
-                                    <h3>عدد الوكلاء</h3>
-                                    <p class="report-value" id="total-agents">0</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Add Property Modal -->
-            <div id="add-property-modal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>إضافة عقار جديد</h2>
-                        <span class="close-modal" onclick="closeModal('add-property-modal')">&times;</span>
-                    </div>
-                    <form id="add-property-form">
-                        <div class="form-group">
-                            <label>عنوان العقار</label>
-                            <input type="text" id="property-title" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>السعر</label>
-                            <input type="number" id="property-price" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>المدينة</label>
-                            <input type="text" id="property-city" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الحي</label>
-                            <input type="text" id="property-district" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>المساحة (م²)</label>
-                            <input type="number" id="property-area" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>عدد غرف النوم</label>
-                            <input type="number" id="property-bedrooms">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>عدد الحمامات</label>
-                            <input type="number" id="property-bathrooms">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الوصف</label>
-                            <textarea id="property-description"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>نوع العقار</label>
-                            <select id="property-type">
-                                <option value="sale">للبيع</option>
-                                <option value="rent">للإيجار</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الحالة</label>
-                            <select id="property-status">
-                                <option value="available">متاح</option>
-                                <option value="sold">مباع</option>
-                            </select>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">إضافة العقار</button>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Edit Property Modal -->
-            <div id="edit-property-modal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>تعديل العقار</h2>
-                        <span class="close-modal" onclick="closeModal('edit-property-modal')">&times;</span>
-                    </div>
-                    <form id="edit-property-form">
-                        <input type="hidden" id="edit-property-id">
-                        
-                        <div class="form-group">
-                            <label>عنوان العقار</label>
-                            <input type="text" id="edit-property-title" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>السعر</label>
-                            <input type="number" id="edit-property-price" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>المدينة</label>
-                            <input type="text" id="edit-property-city" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الحي</label>
-                            <input type="text" id="edit-property-district" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>المساحة (م²)</label>
-                            <input type="number" id="edit-property-area" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>عدد غرف النوم</label>
-                            <input type="number" id="edit-property-bedrooms">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>عدد الحمامات</label>
-                            <input type="number" id="edit-property-bathrooms">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الوصف</label>
-                            <textarea id="edit-property-description"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>نوع العقار</label>
-                            <select id="edit-property-type">
-                                <option value="sale">للبيع</option>
-                                <option value="rent">للإيجار</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الحالة</label>
-                            <select id="edit-property-status">
-                                <option value="available">متاح</option>
-                                <option value="sold">مباع</option>
-                            </select>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">تحديث العقار</button>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Add Agent Modal -->
-            <div id="add-agent-modal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>إضافة وكيل جديد</h2>
-                        <span class="close-modal" onclick="closeModal('add-agent-modal')">&times;</span>
-                    </div>
-                    <form id="add-agent-form">
-                        <div class="form-group">
-                            <label>الاسم الكامل</label>
-                            <input type="text" id="agent-name" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>البريد الإلكتروني</label>
-                            <input type="email" id="agent-email" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>رقم الهاتف</label>
-                            <input type="tel" id="agent-phone">
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">إضافة الوكيل</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>عن عقارك</h3>
-                    <p>منصة عقارية رائدة تهدف إلى تسهيل عملية buying وبيع وتأجير العقارات في المملكة العربية السعودية.</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>روابط سريعة</h3>
-                    <ul>
-                        <li><a href="#" onclick="showHomePage(); return false;">الرئيسية</a></li>
-                        <li><a href="#" onclick="showPropertiesListing(); return false;">عقارات للبيع</a></li>
-                        <li><a href="#" onclick="showRentListing(); return false;">عقارات للإيجار</a></li>
-                        <li><a href="#">وكلاء عقاريون</a></li>
-                        <li><a href="#" onclick="showContactPage(); return false;">اتصل بنا</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>وسائل التواصل</h3>
-                    <ul>
-                        <li><a href="#"><i class="fas fa-phone"></i> 920000000</a></li>
-                        <li><a href="#"><i class="fas fa-envelope"></i> info@aqarak.com</a></li>
-                        <li><a href="#"><i class="fab fa-twitter"></i> twitter.com/aqarak</a></li>
-                        <li><a href="#"><i class="fab fa-instagram"></i> instagram.com/aqarak</a></li>
-                    </ul>
-                </div>
-            </div>
-            
             <div class="footer-bottom">
                 <p>&copy; 2023 عقارك. جميع الحقوق محفوظة.</p>
             </div>
@@ -823,23 +486,21 @@
     <!-- Login Modal -->
     <div id="login-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>تسجيل الدخول</h2>
-                <span class="close-modal" onclick="closeModal('login-modal')">&times;</span>
-            </div>
+            <span class="close" onclick="closeModal('login-modal')">&times;</span>
+            <h2>تسجيل الدخول</h2>
             <form id="login-form">
                 <div class="form-group">
-                    <label>البريد الإلكتروني</label>
+                    <label for="login-email">البريد الإلكتروني</label>
                     <input type="email" id="login-email" required>
                 </div>
                 <div class="form-group">
-                    <label>كلمة المرور</label>
+                    <label for="login-password">كلمة المرور</label>
                     <input type="password" id="login-password" required>
                 </div>
-                <button type="submit" class="btn btn-primary">دخول</button>
-                <p style="text-align: center; margin-top: 15px;">
-                    ليس لديك حساب؟ <a href="#" onclick="showModal('register-modal'); closeModal('login-modal')">إنشاء حساب</a>
-                </p>
+                <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
+                <div class="form-footer">
+                    <p>ليس لديك حساب؟ <a href="#" onclick="showModal('register-modal')">إنشاء حساب</a></p>
+                </div>
             </form>
         </div>
     </div>
@@ -847,37 +508,225 @@
     <!-- Register Modal -->
     <div id="register-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>إنشاء حساب جديد</h2>
-                <span class="close-modal" onclick="closeModal('register-modal')">&times;</span>
-            </div>
+            <span class="close" onclick="closeModal('register-modal')">&times;</span>
+            <h2>إنشاء حساب</h2>
             <form id="register-form">
                 <div class="form-group">
-                    <label>الاسم الكامل</label>
+                    <label for="register-name">الاسم</label>
                     <input type="text" id="register-name" required>
                 </div>
                 <div class="form-group">
-                    <label>البريد الإلكتروني</label>
+                    <label for="register-email">البريد الإلكتروني</label>
                     <input type="email" id="register-email" required>
                 </div>
                 <div class="form-group">
-                    <label>كلمة المرور</label>
+                    <label for="register-password">كلمة المرور</label>
                     <input type="password" id="register-password" required>
                 </div>
                 <div class="form-group">
-                    <label>تأكيد كلمة المرور</label>
+                    <label for="register-password-confirm">تأكيد كلمة المرور</label>
                     <input type="password" id="register-password-confirm" required>
                 </div>
                 <button type="submit" class="btn btn-primary">إنشاء حساب</button>
-                <p style="text-align: center; margin-top: 15px;">
-                    لديك حساب بالفعل؟ <a href="#" onclick="showModal('login-modal'); closeModal('register-modal')">تسجيل الدخول</a>
-                </p>
+                <div class="form-footer">
+                    <p>لديك حساب بالفعل؟ <a href="#" onclick="showModal('login-modal')">تسجيل الدخول</a></p>
+                </div>
             </form>
         </div>
     </div>
 
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeContactModal()">&times;</span>
+            <h2>إرسال رسالة</h2>
+            <form id="contact-modal-form">
+                <div class="form-group">
+                    <label for="contact-modal-name">الاسم</label>
+                    <input type="text" id="contact-modal-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact-modal-email">البريد الإلكتروني</label>
+                    <input type="email" id="contact-modal-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact-modal-phone">الهاتف</label>
+                    <input type="tel" id="contact-modal-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact-modal-message">الرسالة</label>
+                    <textarea id="contact-modal-message" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">إرسال الرسالة</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Property Modal -->
+    <div id="add-property-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-property-modal')">&times;</span>
+            <h2>إضافة عقار جديد</h2>
+            <form id="add-property-form">
+                <div class="form-group">
+                    <label for="property-title">العنوان</label>
+                    <input type="text" id="property-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="property-price">السعر</label>
+                    <input type="number" id="property-price" required>
+                </div>
+                <div class="form-group">
+                    <label for="property-city">المدينة</label>
+                    <input type="text" id="property-city" required>
+                </div>
+                <div class="form-group">
+                    <label for="property-district">الحي</label>
+                    <input type="text" id="property-district" required>
+                </div>
+                <div class="form-group">
+                    <label for="property-area">المساحة (م²)</label>
+                    <input type="number" id="property-area" required>
+                </div>
+                <div class="form-group">
+                    <label for="property-bedrooms">عدد غرف النوم</label>
+                    <input type="number" id="property-bedrooms">
+                </div>
+                <div class="form-group">
+                    <label for="property-bathrooms">عدد الحمامات</label>
+                    <input type="number" id="property-bathrooms">
+                </div>
+                <div class="form-group">
+                    <label for="property-description">الوصف</label>
+                    <textarea id="property-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="property-type">النوع</label>
+                    <select id="property-type" required>
+                        <option value="sale">للبيع</option>
+                        <option value="rent">للإيجار</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="property-status">الحالة</label>
+                    <select id="property-status" required>
+                        <option value="available">متاح</option>
+                        <option value="sold">مباع</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">إضافة العقار</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Property Modal -->
+    <div id="edit-property-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('edit-property-modal')">&times;</span>
+            <h2>تعديل العقار</h2>
+            <form id="edit-property-form">
+                <input type="hidden" id="edit-property-id">
+                <div class="form-group">
+                    <label for="edit-property-title">العنوان</label>
+                    <input type="text" id="edit-property-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-price">السعر</label>
+                    <input type="number" id="edit-property-price" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-city">المدينة</label>
+                    <input type="text" id="edit-property-city" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-district">الحي</label>
+                    <input type="text" id="edit-property-district" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-area">المساحة (م²)</label>
+                    <input type="number" id="edit-property-area" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-bedrooms">عدد غرف النوم</label>
+                    <input type="number" id="edit-property-bedrooms">
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-bathrooms">عدد الحمامات</label>
+                    <input type="number" id="edit-property-bathrooms">
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-description">الوصف</label>
+                    <textarea id="edit-property-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-type">النوع</label>
+                    <select id="edit-property-type" required>
+                        <option value="sale">للبيع</option>
+                        <option value="rent">للإيجار</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-property-status">الحالة</label>
+                    <select id="edit-property-status" required>
+                        <option value="available">متاح</option>
+                        <option value="sold">مباع</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">تحديث العقار</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Agent Modal -->
+    <div id="add-agent-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-agent-modal')">&times;</span>
+            <h2>إضافة وكيل جديد</h2>
+            <form id="add-agent-form">
+                <div class="form-group">
+                    <label for="agent-name">الاسم</label>
+                    <input type="text" id="agent-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="agent-phone">الهاتف</label>
+                    <input type="tel" id="agent-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="agent-email">البريد الإلكتروني</label>
+                    <input type="email" id="agent-email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">إضافة الوكيل</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Agent Modal -->
+    <div id="edit-agent-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('edit-agent-modal')">&times;</span>
+            <h2>تعديل الوكيل</h2>
+            <form id="edit-agent-form">
+                <input type="hidden" id="edit-agent-id">
+                <div class="form-group">
+                    <label for="edit-agent-name">الاسم</label>
+                    <input type="text" id="edit-agent-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-agent-phone">الهاتف</label>
+                    <input type="tel" id="edit-agent-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-agent-email">البريد الإلكتروني</label>
+                    <input type="email" id="edit-agent-email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">تحديث الوكيل</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/supabase@2.38.4/dist/umd/supabase.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
