@@ -11,6 +11,7 @@ let phoneNumberVisible = false;
 let currentPropertyId = null;
 let currentUser = null;
 let userProfile = null;
+let isOwner = false;
 
 // Modal functions
 function showModal(modalId) {
@@ -64,6 +65,30 @@ async function updateUserUI(user) {
     document.getElementById('auth-buttons').style.display = 'none';
     document.getElementById('user-info').style.display = 'flex';
     document.getElementById('user-name').textContent = `مرحباً، ${displayName}`;
+    
+    // Update navigation based on user role
+    await updateNavigation();
+}
+
+// Update navigation based on user role
+async function updateNavigation() {
+    if (!currentUser) {
+        document.querySelectorAll('.nav-owner, .nav-user').forEach(el => el.style.display = 'none');
+        return;
+    }
+
+    // Get user profile
+    const profile = await getUserProfile(currentUser.id);
+    
+    if (profile && profile.is_owner) {
+        isOwner = true;
+        document.querySelectorAll('.nav-owner').forEach(el => el.style.display = 'block');
+        document.querySelectorAll('.nav-user').forEach(el => el.style.display = 'none');
+    } else {
+        isOwner = false;
+        document.querySelectorAll('.nav-owner').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.nav-user').forEach(el => el.style.display = 'block');
+    }
 }
 
 // Check if user is already logged in
@@ -145,6 +170,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
     const confirmPassword = document.getElementById('register-password-confirm').value;
+    const isOwner = document.getElementById('register-is-owner').checked;
     
     if (password !== confirmPassword) {
         alert('كلمتا المرور غير متطابقتين');
@@ -176,7 +202,8 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
                     { 
                         id: data.user.id, 
                         full_name: name, 
-                        email: email 
+                        email: email,
+                        is_owner: isOwner
                     }
                 ]);
                 
@@ -266,6 +293,7 @@ async function logout() {
         // Update UI
         currentUser = null;
         userProfile = null;
+        isOwner = false;
         await updateUserUI(null);
         
         alert('تم تسجيل الخروج بنجاح');
@@ -404,20 +432,14 @@ async function showFavorites() {
     }
     
     // Hide other pages
-    document.getElementById('home-page').style.display = 'none';
-    document.getElementById('properties-listing').style.display = 'none';
-    document.getElementById('rent-listing').style.display = 'none';
-    document.getElementById('property-detail').style.display = 'none';
-    document.getElementById('contact-page').style.display = 'none';
-    
-    // Show favorites page
+    hideAllPages();
     document.getElementById('favorites-page').style.display = 'block';
     
     // Update breadcrumb
-    document.getElementById('breadcrumb-list').innerHTML = `
-        <li><a onclick="showHomePage()">الرئيسية</a></li>
-        <li>عقاراتي المفضلة</li>
-    `;
+    updateBreadcrumb([
+        { text: 'الرئيسية', onclick: 'showHomePage()' },
+        { text: 'عقاراتي المفضلة' }
+    ]);
     
     try {
         // Get user's favorites with property details
@@ -601,20 +623,16 @@ function createPropertyCard(property) {
 
 // Function to show home page
 function showHomePage() {
+    hideAllPages();
     document.getElementById('home-page').style.display = 'block';
-    document.getElementById('properties-listing').style.display = 'none';
-    document.getElementById('rent-listing').style.display = 'none';
-    document.getElementById('property-detail').style.display = 'none';
-    document.getElementById('contact-page').style.display = 'none';
-    document.getElementById('favorites-page').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
     
     // Reset breadcrumb
-    document.getElementById('breadcrumb-list').innerHTML = `
-        <li><a onclick="showHomePage()">الرئيسية</a></li>
-    `;
+    updateBreadcrumb([
+        { text: 'الرئيسية', onclick: 'showHomePage()' }
+    ]);
     
     // Load properties
     loadHomePageProperties();
@@ -637,12 +655,8 @@ async function loadHomePageProperties() {
 
 // Function to show properties listing (for sale)
 async function showPropertiesListing() {
-    document.getElementById('home-page').style.display = 'none';
+    hideAllPages();
     document.getElementById('properties-listing').style.display = 'block';
-    document.getElementById('rent-listing').style.display = 'none';
-    document.getElementById('property-detail').style.display = 'none';
-    document.getElementById('contact-page').style.display = 'none';
-    document.getElementById('favorites-page').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
@@ -650,10 +664,10 @@ async function showPropertiesListing() {
     currentListingType = 'sale';
     
     // Update breadcrumb
-    document.getElementById('breadcrumb-list').innerHTML = `
-        <li><a onclick="showHomePage()">الرئيسية</a></li>
-        <li><a onclick="showPropertiesListing()">عقارات للبيع</a></li>
-    `;
+    updateBreadcrumb([
+        { text: 'الرئيسية', onclick: 'showHomePage()' },
+        { text: 'عقارات للبيع', onclick: 'showPropertiesListing()' }
+    ]);
     
     // Load properties
     const propertiesGrid = document.getElementById('sale-properties-grid');
@@ -671,12 +685,8 @@ async function showPropertiesListing() {
 
 // Function to show rent properties listing
 async function showRentListing() {
-    document.getElementById('home-page').style.display = 'none';
-    document.getElementById('properties-listing').style.display = 'none';
+    hideAllPages();
     document.getElementById('rent-listing').style.display = 'block';
-    document.getElementById('property-detail').style.display = 'none';
-    document.getElementById('contact-page').style.display = 'none';
-    document.getElementById('favorites-page').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
@@ -684,10 +694,10 @@ async function showRentListing() {
     currentListingType = 'rent';
     
     // Update breadcrumb
-    document.getElementById('breadcrumb-list').innerHTML = `
-        <li><a onclick="showHomePage()">الرئيسية</a></li>
-        <li><a onclick="showRentListing()">عقارات للإيجار</a></li>
-    `;
+    updateBreadcrumb([
+        { text: 'الرئيسية', onclick: 'showHomePage()' },
+        { text: 'عقارات للإيجار', onclick: 'showRentListing()' }
+    ]);
     
     // Load properties
     const propertiesGrid = document.getElementById('rent-properties-grid');
@@ -705,21 +715,17 @@ async function showRentListing() {
 
 // Function to show contact page
 function showContactPage() {
-    document.getElementById('home-page').style.display = 'none';
-    document.getElementById('properties-listing').style.display = 'none';
-    document.getElementById('rent-listing').style.display = 'none';
-    document.getElementById('property-detail').style.display = 'none';
+    hideAllPages();
     document.getElementById('contact-page').style.display = 'block';
-    document.getElementById('favorites-page').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
     
     // Update breadcrumb
-    document.getElementById('breadcrumb-list').innerHTML = `
-        <li><a onclick="showHomePage()">الرئيسية</a></li>
-        <li><a onclick="showContactPage()">اتصل بنا</a></li>
-    `;
+    updateBreadcrumb([
+        { text: 'الرئيسية', onclick: 'showHomePage()' },
+        { text: 'اتصل بنا', onclick: 'showContactPage()' }
+    ]);
     
     // Initialize contact map
     initContactMap();
@@ -906,15 +912,8 @@ async function performRentSearch() {
 
 // Function to show property details and hide listing
 async function showPropertyDetails(propertyId, propertyType) {
-    document.getElementById('home-page').style.display = 'none';
-    document.getElementById('properties-listing').style.display = 'none';
-    document.getElementById('rent-listing').style.display = 'none';
+    hideAllPages();
     document.getElementById('property-detail').style.display = 'block';
-    document.getElementById('contact-page').style.display = 'none';
-    document.getElementById('favorites-page').style.display = 'none';
-    document.getElementById('search-results').style.display = 'none';
-    document.getElementById('sale-search-results').style.display = 'none';
-    document.getElementById('rent-search-results').style.display = 'none';
     
     currentPropertyId = propertyId;
     
@@ -1056,19 +1055,34 @@ async function showPropertyDetails(propertyId, propertyType) {
     const isFavorite = await checkIfFavorite(propertyId);
     updateFavoriteButton(propertyId, isFavorite);
     
+    // Check if the current user is the owner
+    const isPropertyOwner = currentUser && property.owner_id === currentUser.id;
+    
+    // Add order button if not the owner
+    if (!isPropertyOwner) {
+        const orderButton = document.createElement('button');
+        orderButton.className = 'btn btn-primary';
+        orderButton.textContent = 'طلب هذا العقار';
+        orderButton.onclick = () => placeOrder(propertyId);
+        
+        // Insert the button in the property content area
+        const propertyContent = document.querySelector('.property-content > div:first-child');
+        propertyContent.appendChild(orderButton);
+    }
+    
     // Update breadcrumb
     if (propertyType === 'sale') {
-        document.getElementById('breadcrumb-list').innerHTML = `
-            <li><a onclick="showHomePage()">الرئيسية</a></li>
-            <li><a onclick="showPropertiesListing()">عقارات للبيع</a></li>
-            <li>تفاصيل العقار</li>
-        `;
+        updateBreadcrumb([
+            { text: 'الرئيسية', onclick: 'showHomePage()' },
+            { text: 'عقارات للبيع', onclick: 'showPropertiesListing()' },
+            { text: 'تفاصيل العقار' }
+        ]);
     } else {
-        document.getElementById('breadcrumb-list').innerHTML = `
-            <li><a onclick="showHomePage()">الرئيسية</a></li>
-            <li><a onclick="showRentListing()">عقارات للإيجار</a></li>
-            <li>تفاصيل العقار</li>
-        `;
+        updateBreadcrumb([
+            { text: 'الرئيسية', onclick: 'showHomePage()' },
+            { text: 'عقارات للإيجار', onclick: 'showRentListing()' },
+            { text: 'تفاصيل العقار' }
+        ]);
     }
     
     // Initialize map
@@ -1196,6 +1210,7 @@ window.onload = function() {
         } else if (event === 'SIGNED_OUT') {
             currentUser = null;
             userProfile = null;
+            isOwner = false;
             await updateUserUI(null);
         } else if (event === 'USER_UPDATED') {
             // This event is triggered when email is confirmed
@@ -1205,5 +1220,499 @@ window.onload = function() {
                 alert('تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول.');
             }
         }
+    });
+}
+
+// Owner Dashboard Functions
+
+// Show owner dashboard
+async function showOwnerDashboard() {
+    if (!isOwner) {
+        alert('غير مصرح لك بالوصول إلى هذه الصفحة');
+        return;
+    }
+    
+    // Hide other pages
+    hideAllPages();
+    document.getElementById('owner-dashboard').style.display = 'block';
+    
+    // Update breadcrumb
+    updateBreadcrumb([
+        { text: 'الرئيسية', onclick: 'showHomePage()' },
+        { text: 'لوحة التحكم' }
+    ]);
+    
+    // Load owner properties
+    await loadOwnerProperties();
+}
+
+// Load owner properties
+async function loadOwnerProperties() {
+    const grid = document.getElementById('owner-properties-grid');
+    grid.innerHTML = '';
+    
+    const { data: properties, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('owner_id', currentUser.id);
+        
+    if (error) {
+        console.error('Error loading properties:', error);
+        return;
+    }
+    
+    if (properties.length === 0) {
+        grid.innerHTML = '<p>لا توجد عقارات مضافة بعد.</p>';
+        return;
+    }
+    
+    properties.forEach(property => {
+        const card = createPropertyCard(property);
+        
+        // Add edit and delete buttons
+        const actions = document.createElement('div');
+        actions.className = 'property-actions';
+        actions.innerHTML = `
+            <button class="btn btn-primary" onclick="showEditPropertyForm('${property.id}')">تعديل</button>
+            <button class="btn btn-danger" onclick="deleteProperty('${property.id}')">حذف</button>
+        `;
+        
+        card.appendChild(actions);
+        grid.appendChild(card);
+    });
+}
+
+// Show owner properties
+function showOwnerProperties() {
+    // Switch to properties tab
+    document.querySelectorAll('.dashboard-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    document.getElementById('owner-properties').style.display = 'block';
+    document.getElementById('owner-orders').style.display = 'none';
+    document.getElementById('owner-stats').style.display = 'none';
+    
+    // Load properties
+    loadOwnerProperties();
+}
+
+// Show owner orders
+async function showOwnerOrders() {
+    // Switch to orders tab
+    document.querySelectorAll('.dashboard-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    document.getElementById('owner-properties').style.display = 'none';
+    document.getElementById('owner-orders').style.display = 'block';
+    document.getElementById('owner-stats').style.display = 'none';
+    
+    // Load orders
+    await loadOwnerOrders();
+}
+
+// Load owner orders
+async function loadOwnerOrders() {
+    const container = document.getElementById('owner-orders-container');
+    container.innerHTML = '';
+    
+    // Get orders for properties owned by the current user
+    const { data: orders, error } = await supabase
+        .from('orders')
+        .select(`
+            id,
+            status,
+            created_at,
+            user_id,
+            properties (
+                id,
+                title,
+                price,
+                type
+            ),
+            profiles (
+                full_name,
+                email
+            )
+        `)
+        .eq('properties.owner_id', currentUser.id);
+        
+    if (error) {
+        console.error('Error loading orders:', error);
+        return;
+    }
+    
+    if (orders.length === 0) {
+        container.innerHTML = '<p>لا توجد طلبات.</p>';
+        return;
+    }
+    
+    orders.forEach(order => {
+        const orderCard = document.createElement('div');
+        orderCard.className = 'order-card';
+        orderCard.innerHTML = `
+            <h3>${order.properties.title}</h3>
+            <p>السعر: ${order.properties.price.toLocaleString()} ريال</p>
+            <p>الطالب: ${order.profiles.full_name} (${order.profiles.email})</p>
+            <p>تاريخ الطلب: ${new Date(order.created_at).toLocaleDateString()}</p>
+            <p>الحالة: ${getStatusText(order.status)}</p>
+            ${order.status === 'pending' ? `
+                <div>
+                    <button class="btn btn-success" onclick="updateOrderStatus('${order.id}', 'approved')">موافقة</button>
+                    <button class="btn btn-danger" onclick="updateOrderStatus('${order.id}', 'rejected')">رفض</button>
+                </div>
+            ` : ''}
+        `;
+        container.appendChild(orderCard);
+    });
+}
+
+// Show owner statistics
+async function showOwnerStats() {
+    // Switch to stats tab
+    document.querySelectorAll('.dashboard-tab').forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    document.getElementById('owner-properties').style.display = 'none';
+    document.getElementById('owner-orders').style.display = 'none';
+    document.getElementById('owner-stats').style.display = 'block';
+    
+    // Load statistics
+    await loadOwnerStats();
+}
+
+// Load owner statistics
+async function loadOwnerStats() {
+    // Get order statistics
+    const { data: orders, error } = await supabase
+        .from('orders')
+        .select('status')
+        .eq('properties.owner_id', currentUser.id);
+        
+    if (error) {
+        console.error('Error loading statistics:', error);
+        return;
+    }
+    
+    const stats = {
+        total: orders.length,
+        approved: orders.filter(o => o.status === 'approved').length,
+        rejected: orders.filter(o => o.status === 'rejected').length,
+        pending: orders.filter(o => o.status === 'pending').length
+    };
+    
+    // Update stat cards
+    document.getElementById('total-orders').textContent = stats.total;
+    document.getElementById('approved-orders').textContent = stats.approved;
+    document.getElementById('rejected-orders').textContent = stats.rejected;
+    document.getElementById('pending-orders').textContent = stats.pending;
+    
+    // Create chart
+    createOrdersChart(stats);
+}
+
+// Create orders chart
+function createOrdersChart(stats) {
+    const ctx = document.getElementById('orders-chart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (window.ordersChart) {
+        window.ordersChart.destroy();
+    }
+    
+    window.ordersChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['مقبول', 'مرفوض', 'قيد الانتظار'],
+            datasets: [{
+                label: 'عدد الطلبات',
+                data: [stats.approved, stats.rejected, stats.pending],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 206, 86, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update order status
+async function updateOrderStatus(orderId, status) {
+    const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+        
+    if (error) {
+        console.error('Error updating order status:', error);
+        alert('حدث خطأ أثناء تحديث الحالة');
+        return;
+    }
+    
+    alert('تم تحديث الحالة بنجاح');
+    loadOwnerOrders(); // Reload orders
+}
+
+// Show user orders
+async function showUserOrders() {
+    // Hide other pages
+    hideAllPages();
+    document.getElementById('user-orders').style.display = 'block';
+    
+    // Update breadcrumb
+    updateBreadcrumb([
+        { text: 'الرئيسية', onclick: 'showHomePage()' },
+        { text: 'طلباتي' }
+    ]);
+    
+    // Load user orders
+    await loadUserOrders();
+}
+
+// Load user orders
+async function loadUserOrders() {
+    const container = document.getElementById('user-orders-container');
+    container.innerHTML = '';
+    
+    const { data: orders, error } = await supabase
+        .from('orders')
+        .select(`
+            id,
+            status,
+            created_at,
+            properties (
+                id,
+                title,
+                price,
+                type,
+                city,
+                district
+            )
+        `)
+        .eq('user_id', currentUser.id);
+        
+    if (error) {
+        console.error('Error loading orders:', error);
+        return;
+    }
+    
+    if (orders.length === 0) {
+        container.innerHTML = '<p>لم تقم بطلب أي عقار بعد.</p>';
+        return;
+    }
+    
+    orders.forEach(order => {
+        const orderCard = document.createElement('div');
+        orderCard.className = 'order-card';
+        orderCard.innerHTML = `
+            <h3>${order.properties.title}</h3>
+            <p>السعر: ${order.properties.price.toLocaleString()} ريال</p>
+            <p>الموقع: ${order.properties.district}، ${order.properties.city}</p>
+            <p>تاريخ الطلب: ${new Date(order.created_at).toLocaleDateString()}</p>
+            <p>الحالة: ${getStatusText(order.status)}</p>
+        `;
+        container.appendChild(orderCard);
+    });
+}
+
+// Place an order for a property
+async function placeOrder(propertyId) {
+    if (!currentUser) {
+        alert('يرجى تسجيل الدخول لطلب العقار');
+        showModal('login-modal');
+        return;
+    }
+    
+    const { error } = await supabase
+        .from('orders')
+        .insert([
+            { property_id: propertyId, user_id: currentUser.id }
+        ]);
+        
+    if (error) {
+        console.error('Error placing order:', error);
+        alert('حدث خطأ أثناء تقديم الطلب');
+        return;
+    }
+    
+    alert('تم تقديم طلبك بنجاح');
+}
+
+// Show add property form
+function showAddPropertyForm() {
+    document.getElementById('property-form-title').textContent = 'إضافة عقار جديد';
+    document.getElementById('property-form').reset();
+    document.getElementById('property-id').value = '';
+    showModal('property-form-modal');
+}
+
+// Show edit property form
+async function showEditPropertyForm(propertyId) {
+    const { data: property, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', propertyId)
+        .single();
+        
+    if (error) {
+        console.error('Error loading property:', error);
+        alert('حدث خطأ أثناء تحميل بيانات العقار');
+        return;
+    }
+    
+    document.getElementById('property-form-title').textContent = 'تعديل عقار';
+    document.getElementById('property-id').value = property.id;
+    document.getElementById('property-title').value = property.title;
+    document.getElementById('property-description').value = property.description;
+    document.getElementById('property-price').value = property.price;
+    document.getElementById('property-type').value = property.type;
+    document.getElementById('property-building-type').value = property.property_type;
+    document.getElementById('property-area').value = property.area;
+    document.getElementById('property-bedrooms').value = property.bedrooms || '';
+    document.getElementById('property-bathrooms').value = property.bathrooms || '';
+    document.getElementById('property-city').value = property.city;
+    document.getElementById('property-district').value = property.district;
+    document.getElementById('property-image').value = property.image_urls ? property.image_urls[0] : '';
+    document.getElementById('property-images').value = property.image_urls ? property.image_urls.slice(1).join(',') : '';
+    document.getElementById('property-features').value = property.features ? property.features.join(',') : '';
+    
+    showModal('property-form-modal');
+}
+
+// Save property (add or update)
+document.getElementById('property-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const propertyId = document.getElementById('property-id').value;
+    const propertyData = {
+        title: document.getElementById('property-title').value,
+        description: document.getElementById('property-description').value,
+        price: parseFloat(document.getElementById('property-price').value),
+        type: document.getElementById('property-type').value,
+        property_type: document.getElementById('property-building-type').value,
+        area: parseInt(document.getElementById('property-area').value),
+        bedrooms: document.getElementById('property-bedrooms').value ? parseInt(document.getElementById('property-bedrooms').value) : null,
+        bathrooms: document.getElementById('property-bathrooms').value ? parseInt(document.getElementById('property-bathrooms').value) : null,
+        city: document.getElementById('property-city').value,
+        district: document.getElementById('property-district').value,
+        image_urls: [document.getElementById('property-image').value, ...document.getElementById('property-images').value.split(',').map(url => url.trim()).filter(url => url)],
+        features: document.getElementById('property-features').value.split(',').map(feature => feature.trim()).filter(feature => feature)
+    };
+    
+    if (propertyId) {
+        // Update existing property
+        const { error } = await supabase
+            .from('properties')
+            .update(propertyData)
+            .eq('id', propertyId);
+            
+        if (error) {
+            console.error('Error updating property:', error);
+            alert('حدث خطأ أثناء تحديث العقار');
+            return;
+        }
+        
+        alert('تم تحديث العقار بنجاح');
+    } else {
+        // Add new property
+        propertyData.owner_id = currentUser.id;
+        const { error } = await supabase
+            .from('properties')
+            .insert([propertyData]);
+            
+        if (error) {
+            console.error('Error adding property:', error);
+            alert('حدث خطأ أثناء إضافة العقار');
+            return;
+        }
+        
+        alert('تم إضافة العقار بنجاح');
+    }
+    
+    closePropertyFormModal();
+    loadOwnerProperties(); // Reload properties
+});
+
+// Close property form modal
+function closePropertyFormModal() {
+    closeModal('property-form-modal');
+}
+
+// Delete property
+async function deleteProperty(propertyId) {
+    if (!confirm('هل أنت متأكد من حذف هذا العقار؟')) {
+        return;
+    }
+    
+    const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', propertyId);
+        
+    if (error) {
+        console.error('Error deleting property:', error);
+        alert('حدث خطأ أثناء حذف العقار');
+        return;
+    }
+    
+    alert('تم حذف العقار بنجاح');
+    loadOwnerProperties(); // Reload properties
+}
+
+// Helper function to get status text in Arabic
+function getStatusText(status) {
+    switch (status) {
+        case 'pending': return 'قيد الانتظار';
+        case 'approved': return 'مقبول';
+        case 'rejected': return 'مرفوض';
+        default: return status;
+    }
+}
+
+// Helper function to hide all pages
+function hideAllPages() {
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('properties-listing').style.display = 'none';
+    document.getElementById('rent-listing').style.display = 'none';
+    document.getElementById('property-detail').style.display = 'none';
+    document.getElementById('contact-page').style.display = 'none';
+    document.getElementById('favorites-page').style.display = 'none';
+    document.getElementById('owner-dashboard').style.display = 'none';
+    document.getElementById('user-orders').style.display = 'none';
+    document.getElementById('search-results').style.display = 'none';
+    document.getElementById('sale-search-results').style.display = 'none';
+    document.getElementById('rent-search-results').style.display = 'none';
+}
+
+// Helper function to update breadcrumb
+function updateBreadcrumb(items) {
+    const breadcrumbList = document.getElementById('breadcrumb-list');
+    breadcrumbList.innerHTML = '';
+    
+    items.forEach((item, index) => {
+        const li = document.createElement('li');
+        if (index < items.length - 1) {
+            li.innerHTML = `<a onclick="${item.onclick}">${item.text}</a>`;
+        } else {
+            li.textContent = item.text;
+        }
+        breadcrumbList.appendChild(li);
     });
 }
