@@ -24,8 +24,6 @@
                     <li><a href="#" onclick="showFavorites(); return false;">عقاراتي المفضلة</a></li>
                     <li><a href="#">وكلاء عقاريون</a></li>
                     <li><a href="#" onclick="showContactPage(); return false;">اتصل بنا</a></li>
-                    <li class="nav-owner" style="display: none;"><a href="#" onclick="showOwnerDashboard(); return false;">لوحة التحكم</a></li>
-                    <li class="nav-user" style="display: none;"><a href="#" onclick="showUserOrders(); return false;">طلباتي</a></li>
                 </ul>
             </nav>
             <div class="auth-buttons" id="auth-buttons">
@@ -482,77 +480,6 @@
                 <div id="contact-map"></div>
             </div>
         </div>
-        
-        <!-- Owner Dashboard Section -->
-        <div id="owner-dashboard" class="owner-dashboard" style="display: none;">
-            <h1 class="page-title">لوحة التحكم للملاك</h1>
-            
-            <div class="dashboard-tabs">
-                <div class="dashboard-tab active" onclick="showOwnerProperties()">عقاراتي</div>
-                <div class="dashboard-tab" onclick="showOwnerOrders()">الطلبات</div>
-                <div class="dashboard-tab" onclick="showOwnerStats()">الإحصائيات</div>
-            </div>
-            
-            <!-- Properties Management -->
-            <div id="owner-properties" class="owner-properties">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>عقاراتي</h2>
-                    <button class="btn btn-primary" onclick="showAddPropertyForm()">
-                        <i class="fas fa-plus"></i> إضافة عقار جديد
-                    </button>
-                </div>
-                
-                <div id="owner-properties-grid" class="properties-grid">
-                    <!-- Properties will be loaded here -->
-                </div>
-            </div>
-            
-            <!-- Orders Management -->
-            <div id="owner-orders" class="owner-orders" style="display: none;">
-                <h2>طلبات الشراء الواردة</h2>
-                
-                <div id="owner-orders-container">
-                    <!-- Orders will be loaded here -->
-                </div>
-            </div>
-            
-            <!-- Statistics -->
-            <div id="owner-stats" class="owner-stats" style="display: none;">
-                <h2>إحصائيات الطلبات</h2>
-                
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <h3>إجمالي الطلبات</h3>
-                        <div class="stat-value" id="total-orders">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>طلبات معتمدة</h3>
-                        <div class="stat-value" id="approved-orders">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>طلبات مرفوضة</h3>
-                        <div class="stat-value" id="rejected-orders">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>طلبات قيد الانتظار</h3>
-                        <div class="stat-value" id="pending-orders">0</div>
-                    </div>
-                </div>
-                
-                <div class="chart-container">
-                    <canvas id="orders-chart"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <!-- User Orders Section -->
-        <div id="user-orders" class="user-orders" style="display: none;">
-            <h1 class="page-title">طلباتي</h1>
-            
-            <div id="user-orders-container">
-                <!-- Orders will be loaded here -->
-            </div>
-        </div>
     </div>
 
     <!-- Footer -->
@@ -640,12 +567,6 @@
                     <label>تأكيد كلمة المرور</label>
                     <input type="password" id="register-password-confirm" required>
                 </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="register-is-owner">
-                        التسجيل كمالك عقار
-                    </label>
-                </div>
                 <button type="submit" class="btn btn-primary">إنشاء حساب</button>
                 <p style="text-align: center; margin-top: 15px;">
                     لديك حساب بالفعل؟ <a href="#" onclick="showModal('login-modal'); closeModal('register-modal')">تسجيل الدخول</a>
@@ -654,98 +575,8 @@
         </div>
     </div>
 
-    <!-- Property Form Modal -->
-    <div id="property-form-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="property-form-title">إضافة عقار جديد</h2>
-                <span class="close-modal" onclick="closePropertyFormModal()">&times;</span>
-            </div>
-            <form id="property-form">
-                <input type="hidden" id="property-id">
-                
-                <div class="form-group">
-                    <label>عنوان العقار</label>
-                    <input type="text" id="property-title" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>الوصف</label>
-                    <textarea id="property-description" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>السعر (ريال)</label>
-                    <input type="number" id="property-price" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>نوع العقار</label>
-                    <select id="property-type" required>
-                        <option value="sale">للبيع</option>
-                        <option value="rent">للإيجار</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>نوع المبنى</label>
-                    <select id="property-building-type" required>
-                        <option value="villa">فيلا</option>
-                        <option value="apartment">شقة</option>
-                        <option value="house">منزل</option>
-                        <option value="land">أرض</option>
-                        <option value="commercial">تجاري</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>المساحة (م²)</label>
-                    <input type="number" id="property-area" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>عدد غرف النوم</label>
-                    <input type="number" id="property-bedrooms">
-                </div>
-                
-                <div class="form-group">
-                    <label>عدد الحمامات</label>
-                    <input type="number" id="property-bathrooms">
-                </div>
-                
-                <div class="form-group">
-                    <label>المدينة</label>
-                    <input type="text" id="property-city" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>الحي</label>
-                    <input type="text" id="property-district" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>رابط الصورة الرئيسية</label>
-                    <input type="url" id="property-image">
-                </div>
-                
-                <div class="form-group">
-                    <label>روابط الصور الإضافية (فصلها بفواصل)</label>
-                    <textarea id="property-images"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>المرافق (فصلها بفواصل)</label>
-                    <textarea id="property-features"></textarea>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">حفظ</button>
-            </form>
-        </div>
-    </div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7"></script>
     <script src="script.js"></script>
-    <script src="app-functions.js"></script>
 </body>
 </html>
