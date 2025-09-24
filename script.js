@@ -11,7 +11,6 @@ let phoneNumberVisible = false;
 let currentPropertyId = null;
 let currentUser = null;
 let userProfile = null;
-let isOwner = false;
 
 // Modal functions
 function showModal(modalId) {
@@ -65,30 +64,6 @@ async function updateUserUI(user) {
     document.getElementById('auth-buttons').style.display = 'none';
     document.getElementById('user-info').style.display = 'flex';
     document.getElementById('user-name').textContent = `مرحباً، ${displayName}`;
-    
-    // Update navigation based on user role
-    await updateNavigation();
-}
-
-// Update navigation based on user role
-async function updateNavigation() {
-    if (!currentUser) {
-        document.querySelectorAll('.nav-owner, .nav-user').forEach(el => el.style.display = 'none');
-        return;
-    }
-
-    // Get user profile
-    const profile = await getUserProfile(currentUser.id);
-    
-    if (profile && profile.is_owner) {
-        isOwner = true;
-        document.querySelectorAll('.nav-owner').forEach(el => el.style.display = 'block');
-        document.querySelectorAll('.nav-user').forEach(el => el.style.display = 'none');
-    } else {
-        isOwner = false;
-        document.querySelectorAll('.nav-owner').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.nav-user').forEach(el => el.style.display = 'block');
-    }
 }
 
 // Check if user is already logged in
@@ -170,7 +145,6 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
     const confirmPassword = document.getElementById('register-password-confirm').value;
-    const isOwner = document.getElementById('register-is-owner').checked;
     
     if (password !== confirmPassword) {
         alert('كلمتا المرور غير متطابقتين');
@@ -202,8 +176,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
                     { 
                         id: data.user.id, 
                         full_name: name, 
-                        email: email,
-                        is_owner: isOwner
+                        email: email 
                     }
                 ]);
                 
@@ -293,7 +266,6 @@ async function logout() {
         // Update UI
         currentUser = null;
         userProfile = null;
-        isOwner = false;
         await updateUserUI(null);
         
         alert('تم تسجيل الخروج بنجاح');
@@ -432,14 +404,20 @@ async function showFavorites() {
     }
     
     // Hide other pages
-    hideAllPages();
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('properties-listing').style.display = 'none';
+    document.getElementById('rent-listing').style.display = 'none';
+    document.getElementById('property-detail').style.display = 'none';
+    document.getElementById('contact-page').style.display = 'none';
+    
+    // Show favorites page
     document.getElementById('favorites-page').style.display = 'block';
     
     // Update breadcrumb
-    updateBreadcrumb([
-        { text: 'الرئيسية', onclick: 'showHomePage()' },
-        { text: 'عقاراتي المفضلة' }
-    ]);
+    document.getElementById('breadcrumb-list').innerHTML = `
+        <li><a onclick="showHomePage()">الرئيسية</a></li>
+        <li>عقاراتي المفضلة</li>
+    `;
     
     try {
         // Get user's favorites with property details
@@ -623,16 +601,20 @@ function createPropertyCard(property) {
 
 // Function to show home page
 function showHomePage() {
-    hideAllPages();
     document.getElementById('home-page').style.display = 'block';
+    document.getElementById('properties-listing').style.display = 'none';
+    document.getElementById('rent-listing').style.display = 'none';
+    document.getElementById('property-detail').style.display = 'none';
+    document.getElementById('contact-page').style.display = 'none';
+    document.getElementById('favorites-page').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
     
     // Reset breadcrumb
-    updateBreadcrumb([
-        { text: 'الرئيسية', onclick: 'showHomePage()' }
-    ]);
+    document.getElementById('breadcrumb-list').innerHTML = `
+        <li><a onclick="showHomePage()">الرئيسية</a></li>
+    `;
     
     // Load properties
     loadHomePageProperties();
@@ -655,8 +637,12 @@ async function loadHomePageProperties() {
 
 // Function to show properties listing (for sale)
 async function showPropertiesListing() {
-    hideAllPages();
+    document.getElementById('home-page').style.display = 'none';
     document.getElementById('properties-listing').style.display = 'block';
+    document.getElementById('rent-listing').style.display = 'none';
+    document.getElementById('property-detail').style.display = 'none';
+    document.getElementById('contact-page').style.display = 'none';
+    document.getElementById('favorites-page').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
@@ -664,10 +650,10 @@ async function showPropertiesListing() {
     currentListingType = 'sale';
     
     // Update breadcrumb
-    updateBreadcrumb([
-        { text: 'الرئيسية', onclick: 'showHomePage()' },
-        { text: 'عقارات للبيع', onclick: 'showPropertiesListing()' }
-    ]);
+    document.getElementById('breadcrumb-list').innerHTML = `
+        <li><a onclick="showHomePage()">الرئيسية</a></li>
+        <li><a onclick="showPropertiesListing()">عقارات للبيع</a></li>
+    `;
     
     // Load properties
     const propertiesGrid = document.getElementById('sale-properties-grid');
@@ -685,8 +671,12 @@ async function showPropertiesListing() {
 
 // Function to show rent properties listing
 async function showRentListing() {
-    hideAllPages();
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('properties-listing').style.display = 'none';
     document.getElementById('rent-listing').style.display = 'block';
+    document.getElementById('property-detail').style.display = 'none';
+    document.getElementById('contact-page').style.display = 'none';
+    document.getElementById('favorites-page').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
@@ -694,10 +684,10 @@ async function showRentListing() {
     currentListingType = 'rent';
     
     // Update breadcrumb
-    updateBreadcrumb([
-        { text: 'الرئيسية', onclick: 'showHomePage()' },
-        { text: 'عقارات للإيجار', onclick: 'showRentListing()' }
-    ]);
+    document.getElementById('breadcrumb-list').innerHTML = `
+        <li><a onclick="showHomePage()">الرئيسية</a></li>
+        <li><a onclick="showRentListing()">عقارات للإيجار</a></li>
+    `;
     
     // Load properties
     const propertiesGrid = document.getElementById('rent-properties-grid');
@@ -715,17 +705,21 @@ async function showRentListing() {
 
 // Function to show contact page
 function showContactPage() {
-    hideAllPages();
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('properties-listing').style.display = 'none';
+    document.getElementById('rent-listing').style.display = 'none';
+    document.getElementById('property-detail').style.display = 'none';
     document.getElementById('contact-page').style.display = 'block';
+    document.getElementById('favorites-page').style.display = 'none';
     document.getElementById('search-results').style.display = 'none';
     document.getElementById('sale-search-results').style.display = 'none';
     document.getElementById('rent-search-results').style.display = 'none';
     
     // Update breadcrumb
-    updateBreadcrumb([
-        { text: 'الرئيسية', onclick: 'showHomePage()' },
-        { text: 'اتصل بنا', onclick: 'showContactPage()' }
-    ]);
+    document.getElementById('breadcrumb-list').innerHTML = `
+        <li><a onclick="showHomePage()">الرئيسية</a></li>
+        <li><a onclick="showContactPage()">اتصل بنا</a></li>
+    `;
     
     // Initialize contact map
     initContactMap();
@@ -912,8 +906,15 @@ async function performRentSearch() {
 
 // Function to show property details and hide listing
 async function showPropertyDetails(propertyId, propertyType) {
-    hideAllPages();
+    document.getElementById('home-page').style.display = 'none';
+    document.getElementById('properties-listing').style.display = 'none';
+    document.getElementById('rent-listing').style.display = 'none';
     document.getElementById('property-detail').style.display = 'block';
+    document.getElementById('contact-page').style.display = 'none';
+    document.getElementById('favorites-page').style.display = 'none';
+    document.getElementById('search-results').style.display = 'none';
+    document.getElementById('sale-search-results').style.display = 'none';
+    document.getElementById('rent-search-results').style.display = 'none';
     
     currentPropertyId = propertyId;
     
@@ -1055,34 +1056,19 @@ async function showPropertyDetails(propertyId, propertyType) {
     const isFavorite = await checkIfFavorite(propertyId);
     updateFavoriteButton(propertyId, isFavorite);
     
-    // Check if the current user is the owner
-    const isPropertyOwner = currentUser && property.owner_id === currentUser.id;
-    
-    // Add order button if not the owner
-    if (!isPropertyOwner) {
-        const orderButton = document.createElement('button');
-        orderButton.className = 'btn btn-primary';
-        orderButton.textContent = 'طلب هذا العقار';
-        orderButton.onclick = () => placeOrder(propertyId);
-        
-        // Insert the button in the property content area
-        const propertyContent = document.querySelector('.property-content > div:first-child');
-        propertyContent.appendChild(orderButton);
-    }
-    
     // Update breadcrumb
     if (propertyType === 'sale') {
-        updateBreadcrumb([
-            { text: 'الرئيسية', onclick: 'showHomePage()' },
-            { text: 'عقارات للبيع', onclick: 'showPropertiesListing()' },
-            { text: 'تفاصيل العقار' }
-        ]);
+        document.getElementById('breadcrumb-list').innerHTML = `
+            <li><a onclick="showHomePage()">الرئيسية</a></li>
+            <li><a onclick="showPropertiesListing()">عقارات للبيع</a></li>
+            <li>تفاصيل العقار</li>
+        `;
     } else {
-        updateBreadcrumb([
-            { text: 'الرئيسية', onclick: 'showHomePage()' },
-            { text: 'عقارات للإيجار', onclick: 'showRentListing()' },
-            { text: 'تفاصيل العقار' }
-        ]);
+        document.getElementById('breadcrumb-list').innerHTML = `
+            <li><a onclick="showHomePage()">الرئيسية</a></li>
+            <li><a onclick="showRentListing()">عقارات للإيجار</a></li>
+            <li>تفاصيل العقار</li>
+        `;
     }
     
     // Initialize map
@@ -1199,9 +1185,6 @@ window.onload = function() {
     // Check if user is logged in
     checkUserSession();
     
-    // Create sample data if needed
-    createSampleDataIfNeeded();
-    
     // Set up auth state change listener
     supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN') {
@@ -1213,7 +1196,6 @@ window.onload = function() {
         } else if (event === 'SIGNED_OUT') {
             currentUser = null;
             userProfile = null;
-            isOwner = false;
             await updateUserUI(null);
         } else if (event === 'USER_UPDATED') {
             // This event is triggered when email is confirmed
@@ -1223,36 +1205,5 @@ window.onload = function() {
                 alert('تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول.');
             }
         }
-    });
-}
-
-// Helper function to hide all pages
-function hideAllPages() {
-    document.getElementById('home-page').style.display = 'none';
-    document.getElementById('properties-listing').style.display = 'none';
-    document.getElementById('rent-listing').style.display = 'none';
-    document.getElementById('property-detail').style.display = 'none';
-    document.getElementById('contact-page').style.display = 'none';
-    document.getElementById('favorites-page').style.display = 'none';
-    document.getElementById('owner-dashboard').style.display = 'none';
-    document.getElementById('user-orders').style.display = 'none';
-    document.getElementById('search-results').style.display = 'none';
-    document.getElementById('sale-search-results').style.display = 'none';
-    document.getElementById('rent-search-results').style.display = 'none';
-}
-
-// Helper function to update breadcrumb
-function updateBreadcrumb(items) {
-    const breadcrumbList = document.getElementById('breadcrumb-list');
-    breadcrumbList.innerHTML = '';
-    
-    items.forEach((item, index) => {
-        const li = document.createElement('li');
-        if (index < items.length - 1) {
-            li.innerHTML = `<a onclick="${item.onclick}">${item.text}</a>`;
-        } else {
-            li.textContent = item.text;
-        }
-        breadcrumbList.appendChild(li);
     });
 }
